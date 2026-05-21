@@ -9,26 +9,30 @@ export default function Home() {
 
 
   return (
-    <main className="bg-transparent">
+    <main className="relative isolate bg-black">
 
       {/* ─── SECTION 0: HERO ─── */}
-      <HeroSection />
+      <div className="sticky top-0 z-0 h-[100svh] overflow-hidden">
+        <HeroSection />
+      </div>
 
-      {/* ─── SECTION 1: ABOUT ─── */}
+      <div className="relative z-10 bg-black">
+        {/* ─── SECTION 1: ABOUT ─── */}
 
-      <AboutLanding />
+        <AboutLanding />
 
-      {/* ─── SECTION 2: THE EXPERIENCE ─── */}
-      <Experience />
+        {/* ─── SECTION 2: THE EXPERIENCE ─── */}
+        <Experience />
 
-      {/* ─── SECTION 3: LATEST ENERGY ─── */}
-      <Gallery />
+        {/* ─── SECTION 3: LATEST ENERGY ─── */}
+        <Gallery />
 
-      {/* ─── SECTION 4: MERCH ─── */}
-      <MerchSection />
+        {/* ─── SECTION 4: MERCH ─── */}
+        <MerchSection />
 
-      {/* ─── SECTION 5: MARQUEE STRIP ─── */}
-      <MarqueeStrip />
+        {/* ─── SECTION 5: MARQUEE STRIP ─── */}
+        <MarqueeStrip />
+      </div>
 
     </main>
   );

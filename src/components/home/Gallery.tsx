@@ -1,5 +1,6 @@
 import Image from "next/image";
 import MotionReveal from "../ui/MotionReveal";
+import ScrambleText from "../ui/ScrambleText";
 
 
 export default function Gallery() {
@@ -19,16 +20,16 @@ export default function Gallery() {
                 LATEST<br />ENERGY
               </h2>
             </div>
-            <a href="#" className="text-white hover:text-primary transition-colors font-sarpanch text-xs uppercase tracking-widest border-b border-white/20 pb-2">
-              View all work →
+            <a href="/vol1-recap" className="text-white hover:text-primary transition-colors font-sarpanch text-xs uppercase tracking-widest border-b border-white/20 pb-2">
+              <ScrambleText text="View all work" /> →
             </a>
           </MotionReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { img: '/gallery-1.png', tag: 'CULTURE', title: 'Street Soul' },
-              { img: '/gallery-2.png', tag: 'GEAR', title: 'Analog Vibe' },
-              { img: '/gallery-3.png', tag: 'NIGHTS', title: 'Neon Pulse' }
+              { img: '/gallery1.jpg', tag: 'CULTURE', title: 'Street Soul' },
+              { img: '/gallery2.jpg', tag: 'GEAR', title: 'Analog Vibe' },
+              { img: '/gallery3.jpg', tag: 'NIGHTS', title: 'Neon Pulse' },
             ].map((item, idx) => (
               <MotionReveal
                 key={item.title}
@@ -40,7 +41,7 @@ export default function Gallery() {
                   src={item.img}
                   alt={item.title}
                   sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+                  className="object-cover group-hover:scale-110 transition-all duration-700"
                 />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
                   <span className="text-primary text-[8px] tracking-[0.3em] uppercase font-proxima mb-2">{item.tag}</span>

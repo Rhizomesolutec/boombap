@@ -2,24 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import ScrambleText from "../ui/ScrambleText";
 
 const links = [
-  { label: "Events", href: "/tickets" },
+  { label: "Events", href: "/events" },
   { label: "Tickets", href: "/tickets" },
-  { label: "Merch", href: "/#merch" },
-  { label: "Recaps", href: "/#gallery" },
+  { label: "Merch", href: "/merch" },
+  { label: "Recaps", href: "/vol1-recap" },
 ];
 
 const socials = ["Instagram", "YouTube", "Spotify"];
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-black text-white">
+    <footer className="relative overflow-hidden border-t border-secondary/20 bg-black text-white">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.035]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 7px)",
+            "repeating-linear-gradient(0deg, var(--color-secondary) 0 1px, transparent 1px 7px)",
         }}
       />
 
@@ -36,10 +37,10 @@ export default function Footer() {
               />
               <div>
                 <p className="font-sarpanch text-2xl font-black uppercase leading-none text-white">
-                  BOOMBAP
+                  <ScrambleText text="BOOMBAP" />
                 </p>
                 <p className="mt-1 font-proxima text-[10px] uppercase tracking-[0.32em] text-primary">
-                  Mumbai / Vol.02
+                  <ScrambleText text="Bengaluru / Vol.02" />
                 </p>
               </div>
             </Link>
@@ -55,9 +56,9 @@ export default function Footer() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="font-proxima text-xs font-bold uppercase tracking-[0.24em] text-white/55 transition-colors hover:text-primary"
+                  className="font-proxima text-xs font-bold uppercase tracking-[0.24em] text-white/55 transition-colors hover:text-secondary"
                 >
-                  {link.label}
+                  <ScrambleText text={link.label} />
                 </Link>
               ))}
             </nav>
@@ -67,18 +68,20 @@ export default function Footer() {
                 <a
                   key={social}
                   href="#"
-                  className="font-proxima text-xs uppercase tracking-[0.24em] text-white/35 transition-colors hover:text-white"
+                  className="font-proxima text-xs uppercase tracking-[0.24em] text-white/35 transition-colors hover:text-secondary"
                 >
-                  {social}
+                  <ScrambleText text={social} />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
-          <div className="inline-flex w-fit items-center border border-white/10 bg-white/[0.03] px-4 py-3">
-            <span className="mr-3 h-2 w-2 bg-primary" />
+
+
+        <div className="mt-8 flex flex-col gap-4 border-t border-secondary/20 pt-6 md:flex-row md:items-center md:justify-between">
+          <div className="inline-flex w-fit items-center border border-secondary/20 bg-secondary/[0.03] px-4 py-3">
+            <span className="mr-3 h-2 w-2 bg-secondary" />
             <span className="font-proxima text-[10px] uppercase tracking-[0.3em] text-white/45">
               Culture stays independent
             </span>
