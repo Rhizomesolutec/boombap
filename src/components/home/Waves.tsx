@@ -106,6 +106,7 @@ interface Mouse {
 
 interface Config {
   lineColor: string;
+  lineWidth: number;
   waveSpeedX: number;
   waveSpeedY: number;
   waveAmpX: number;
@@ -119,6 +120,7 @@ interface Config {
 
 interface WavesProps {
   lineColor?: string;
+  lineWidth?: number;
   backgroundColor?: string;
   waveSpeedX?: number;
   waveSpeedY?: number;
@@ -135,6 +137,7 @@ interface WavesProps {
 
 const Waves: React.FC<WavesProps> = ({
   lineColor = 'black',
+  lineWidth = 1,
   backgroundColor = 'transparent',
   waveSpeedX = 0.0125,
   waveSpeedY = 0.005,
@@ -179,6 +182,7 @@ const Waves: React.FC<WavesProps> = ({
 
   const configRef = useRef<Config>({
     lineColor,
+    lineWidth,
     waveSpeedX,
     waveSpeedY,
     waveAmpX,
@@ -195,6 +199,7 @@ const Waves: React.FC<WavesProps> = ({
   useEffect(() => {
     configRef.current = {
       lineColor,
+      lineWidth,
       waveSpeedX,
       waveSpeedY,
       waveAmpX,
@@ -205,7 +210,7 @@ const Waves: React.FC<WavesProps> = ({
       xGap,
       yGap
     };
-  }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap]);
+  }, [lineColor, lineWidth, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -297,6 +302,7 @@ const Waves: React.FC<WavesProps> = ({
       ctx.clearRect(0, 0, width, height);
       ctx.beginPath();
       ctx.strokeStyle = configRef.current.lineColor;
+      ctx.lineWidth = configRef.current.lineWidth;
       linesRef.current.forEach(points => {
         let p1 = moved(points[0], false);
         ctx.moveTo(p1.x, p1.y);

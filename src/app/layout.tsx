@@ -3,6 +3,7 @@ import { Sarpanch, Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "../components/layout/Header";
 import CustomCursor from "../components/layout/CustomCursor";
+import PageLoader from "../components/layout/PageLoader";
 import Footer from "../components/layout/Footer";
 
 const sarpanch = Sarpanch({
@@ -36,6 +37,7 @@ export default function RootLayout({
         <div className="fixed inset-0 -z-30 bg-secondary" />
         <div className="fixed inset-0 -z-10 pointer-events-none">
         </div>
+        <PageLoader />
         <Header />
         <main className="grow">{children}</main>
         <CustomCursor />

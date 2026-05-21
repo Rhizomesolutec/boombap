@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import ScrambleText from "../ui/ScrambleText";
+import Image from "next/image";
 
 const navLinks = [
-  { label: "Events", href: "/tickets" },
+  { label: "Events", href: "/events" },
   { label: "Tickets", href: "/tickets" },
-  { label: "Merch", href: "/#merch" },
-  { label: "Vol.01 Recap", href: "/#gallery" },
+  { label: "Merch", href: "/merch" },
+  { label: "Vol.01 Recap", href: "/vol1-recap" },
   { label: "Culture", href: "/#culture" },
 ];
 
 const socials = ["Instagram", "Facebook", "Twitter", "YouTube"];
 
 export default function Header() {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isHeroHeader, setIsHeroHeader] = useState(pathname === "/");
 
   // Lock body scroll when menu open
   useEffect(() => {
@@ -26,18 +30,32 @@ export default function Header() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const updateHeaderColor = () => {
+      setIsHeroHeader(pathname === "/" && window.scrollY < window.innerHeight);
+    };
+
+    updateHeaderColor();
+    window.addEventListener("scroll", updateHeaderColor, { passive: true });
+    window.addEventListener("resize", updateHeaderColor);
+
+    return () => {
+      window.removeEventListener("scroll", updateHeaderColor);
+      window.removeEventListener("resize", updateHeaderColor);
+    };
+  }, [pathname]);
+
   return (
     <>
       {/* ─── HEADER BAR ─── */}
       <header
         className="fixed top-0 left-0 w-full z-50 bg-transparent"
       >
-        <div className="max-w-100% mx-auto flex items-center justify-between px-6 md:px-16">
-
+        <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-6 md:h-28 md:px-16">
           {/* LEFT — Logo */}
-          <Link href="/" className="relative z-50 flex items-center justify-center group">
+          <Link href="/" className="relative z-50 flex items-center justify-center group ">
             <Image
-              src="/bmbp-green-logo.png"
+              src={isHeroHeader ? "/bmbp-black-logo.png" : "/bmbp-violet-logo.png"}
               alt="BOOMBAP Logo"
               width={128}
               height={128}
@@ -45,27 +63,35 @@ export default function Header() {
               className={`h-24 w-24 md:h-32 md:w-32 object-contain transition-all duration-500 group-hover:scale-110 ${menuOpen ? "invert" : ""
                 }`}
             />
+
+          {/* LEFT — Wordmark */}
+          {/* <Link
+            href="/"
+            className={`relative z-50 flex items-center font-sarpanch text-lg font-black uppercase leading-none transition-colors duration-300 hover:text-secondary sm:text-xl md:text-2xl ${menuOpen ? "text-primary" : isHeroHeader ? "text-black" : "text-secondary"
+              }`}
+          >
+            <ScrambleText text="boombap.com" /> */}
           </Link>
 
           {/* RIGHT — Burger Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
-            className="relative z-50 w-12 h-12 flex flex-col justify-center items-center gap-[6px] group"
+            className="group relative z-50 flex h-11 w-11 flex-col items-center justify-center gap-[6px] md:h-12 md:w-12"
           >
             {/* Top bar */}
             <span
-              className={`block w-8 h-[2px] bg-primary origin-center transition-all duration-500 ease-in-out ${menuOpen ? "rotate-45 translate-y-[8px]" : ""
+              className={`block h-[2px] w-7 origin-center transition-all duration-500 ease-in-out md:w-8 ${menuOpen ? "rotate-45 translate-y-[8px] bg-primary" : isHeroHeader ? "bg-black group-hover:bg-secondary" : "bg-secondary group-hover:bg-primary"
                 }`}
             />
             {/* Middle bar */}
             <span
-              className={`block h-[2px] bg-white transition-all duration-300 ease-in-out ${menuOpen ? "w-0 opacity-0" : "w-5"
+              className={`block h-[2px] transition-all duration-300 ease-in-out ${menuOpen ? "w-0 opacity-0 bg-primary" : isHeroHeader ? "w-5 bg-black group-hover:bg-secondary" : "w-5 bg-secondary group-hover:bg-primary"
                 }`}
             />
             {/* Bottom bar */}
             <span
-              className={`block w-8 h-[2px] bg-primary origin-center transition-all duration-500 ease-in-out ${menuOpen ? "-rotate-45 translate-y-[-8px]" : ""
+              className={`block h-[2px] w-7 origin-center transition-all duration-500 ease-in-out md:w-8 ${menuOpen ? "-rotate-45 translate-y-[-8px] bg-primary" : isHeroHeader ? "bg-black group-hover:bg-secondary" : "bg-secondary group-hover:bg-primary"
                 }`}
             />
           </button>
@@ -117,10 +143,10 @@ export default function Header() {
                 {/* Link text */}
                 <span
                   className="text-white text-[9vw] md:text-[5vw] font-black uppercase leading-none font-sarpanch
-                             transition-colors duration-200 group-hover:text-primary"
+                             transition-colors duration-200 group-hover:text-secondary"
                   style={{ letterSpacing: "-0.02em" }}
                 >
-                  {link.label}
+                  <ScrambleText text={link.label} />
                 </span>
                 {/* Arrow */}
                 <span
@@ -147,10 +173,10 @@ export default function Header() {
                 <a
                   key={s}
                   href="#"
-                  className="text-white/50 text-xs tracking-[0.2em] uppercase hover:text-primary
+                  className="text-white/50 text-xs tracking-[0.2em] uppercase hover:text-secondary
                              transition-colors duration-200 font-medium font-proxima"
                 >
-                  {s}
+                  <ScrambleText text={s} />
                 </a>
               ))}
             </div>
@@ -161,10 +187,10 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
               className="inline-flex items-center gap-3 bg-primary text-black
                          px-8 py-4 font-black uppercase tracking-widest text-sm
-                         hover:bg-white hover:text-black transition-colors duration-200 self-start md:self-auto font-sarpanch"
+                         hover:bg-secondary hover:text-white transition-colors duration-200 self-start md:self-auto font-sarpanch"
               style={{ letterSpacing: "0.2em", fontSize: "1rem" }}
             >
-              Get Tickets
+              <ScrambleText text="Get Tickets" />
               <span className="text-base">↗</span>
             </Link>
           </div>
