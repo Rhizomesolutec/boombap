@@ -34,7 +34,7 @@ function StickerPreview() {
 export default function MerchSection() {
   return (
     <section id="merch" className="relative w-full overflow-hidden border-t border-white/5 bg-black py-24 md:py-32">
-      <div className="absolute left-1/2 top-10 z-0 -translate-x-1/2 opacity-5">
+      <div className="absolute left-1/2 top-24 md:top-32 z-0 -translate-x-1/2 opacity-5">
         <span className="kinetic-title text-watermark whitespace-nowrap">MERCH</span>
       </div>
 

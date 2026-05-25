@@ -99,23 +99,8 @@ export default function HeroSection() {
         <div className="boombap-filmstrip" style={{ right: "calc(100% / 3 - 1px)" }} />
       </div>
 
-      {/* <BoombapHeroScene /> */}
       <div className="absolute inset-0 z-2 bg-radial-[circle_at_50%_44%] from-transparent via-primary/16 to-primary/78 pointer-events-none" />
       <div className="absolute inset-0 z-2 bg-linear-to-b from-primary/30 via-transparent to-primary/72 pointer-events-none" />
-      {/* <Waves
-        lineColor="#7246C1"
-        backgroundColor="transparent"
-        waveSpeedX={0.01}
-        waveSpeedY={0.008}
-        waveAmpX={30}
-        waveAmpY={25}
-        friction={0.9}
-        tension={0.01}
-        maxCursorMove={120}
-        xGap={10}
-        yGap={22}
-        className="pointer-events-none z-[3] opacity-50 mix-blend-screen"
-      /> */}
       <Waves
         lineColor="#7246C1"
         lineWidth={1.6}
@@ -159,13 +144,6 @@ export default function HeroSection() {
               className="object-cover object-center"
             />
           </MotionReveal>
-           {/* <MotionReveal
-            as="h1"
-            delay={0.12}
-            className="kinetic-title font-sarpanch text-[clamp(3.5rem,15vw,9.5rem)] font-black uppercase leading-[0.82] text-white"
-          >
-            BOOMBAP
-          </MotionReveal> */}
 
           <MotionReveal
             delay={0.24}

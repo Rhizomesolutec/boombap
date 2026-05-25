@@ -25,18 +25,43 @@ body {
   font-family: var(--font-proxima), system-ui, sans-serif;
 }
 
+.custom-cursor {
+  display: none;
+}
+
+.normal-cursor-scope,
+.normal-cursor-scope * {
+  cursor: auto !important;
+}
+
 @media (hover: hover) and (pointer: fine) {
 
-  html,
-  body,
-  a,
-  button,
-  input,
-  textarea,
-  select,
-  [role="button"] {
+  html.custom-cursor-mode,
+  html.custom-cursor-mode body,
+  html.custom-cursor-mode a,
+  html.custom-cursor-mode button,
+  html.custom-cursor-mode input,
+  html.custom-cursor-mode textarea,
+  html.custom-cursor-mode select,
+  html.custom-cursor-mode [role="button"] {
     cursor: none;
   }
+
+  html.custom-cursor-mode .custom-cursor {
+    display: block;
+  }
+
+  html.normal-cursor-mode,
+  html.normal-cursor-mode body,
+  html.normal-cursor-mode *,
+  html.normal-cursor-mode .custom-cursor {
+    cursor: auto !important;
+  }
+
+  html.normal-cursor-mode .custom-cursor {
+    display: none !important;
+  }
+
 }
 
 .font-sarpanch {

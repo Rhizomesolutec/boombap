@@ -23,10 +23,13 @@ export default function CustomCursor() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    document.documentElement.classList.remove("normal-cursor-mode");
+    document.documentElement.classList.add("custom-cursor-mode");
+
     const move = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
+      setIsVisible(true);
     };
 
     const over = (e: MouseEvent) => {
@@ -46,20 +49,21 @@ export default function CustomCursor() {
     document.documentElement.addEventListener("mouseenter", enter);
 
     return () => {
+      document.documentElement.classList.remove("custom-cursor-mode");
       window.removeEventListener("mousemove", move);
       document.removeEventListener("mouseover", over);
       document.removeEventListener("mouseout", out);
       document.documentElement.removeEventListener("mouseleave", leave);
       document.documentElement.removeEventListener("mouseenter", enter);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
   return (
     <>
       {/* Dot — snappy, always on top */}
       <motion.div
         aria-hidden="true"
-        className="fixed z-[9999] pointer-events-none rounded-full bg-[#a0ef46] mix-blend-difference"
+        className="custom-cursor fixed z-[9999] pointer-events-none rounded-full bg-[#a0ef46] mix-blend-difference"
         style={{
           left: dotX,
           top: dotY,
@@ -78,7 +82,7 @@ export default function CustomCursor() {
       {/* Ring — lazy trail */}
       <motion.div
         aria-hidden="true"
-        className="fixed z-[9998] pointer-events-none rounded-full border border-[#a0ef46]/60 mix-blend-difference"
+        className="custom-cursor fixed z-[9998] pointer-events-none rounded-full border border-[#a0ef46]/60 mix-blend-difference"
         style={{
           left: ringX,
           top: ringY,

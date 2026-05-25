@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Vol1RecapExperience from "../../components/vol1/Vol1RecapExperience";
+import Vol1RecapExperience from "../../../components/vol1/Vol1RecapExperience";
 
 export const metadata: Metadata = {
   title: "Vol.01 Recap | BOOMBAP",

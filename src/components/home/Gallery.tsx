@@ -6,7 +6,7 @@ import ScrambleText from "../ui/ScrambleText";
 export default function Gallery() {
     return (
       <section id="gallery" className="relative w-full py-24 bg-black overflow-hidden border-t border-white/5">
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-0 opacity-5">
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-0 opacity-5">
           <span className="kinetic-title text-watermark whitespace-nowrap">ENERGY</span>
         </div>
 
