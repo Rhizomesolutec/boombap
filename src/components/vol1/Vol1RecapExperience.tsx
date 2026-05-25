@@ -22,10 +22,27 @@ const recapVideo =
   "https://player.vimeo.com/video/1193920399?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0";
 
 const reelClips = [
-  { title: "The First Drop", label: "Opening Signal", src: "/dj.mp4", stat: "01", tc: "00:00:00" },
-  { title: "Selectors Locked", label: "Deck Heat", src: "/dj.mp4", stat: "02", tc: "00:47:22" },
-  { title: "Crowd Frequency", label: "Room Lift", src: "/dj.mp4", stat: "03", tc: "02:11:08" },
-  { title: "Afterglow", label: "Last Frame", src: "/dj.mp4", stat: "04", tc: "03:58:41" },
+  {
+    title: "Padachor",
+    label: "BB Signal 01",
+    src: "https://player.vimeo.com/video/1193929856?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
+    stat: "01",
+    tc: "00:00:00"
+  },
+  {
+    title: "Joker Malabari",
+    label: "BB Signal 02",
+    src: "https://player.vimeo.com/video/1193930603?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
+    stat: "02",
+    tc: "00:47:22"
+  },
+  {
+    title: "Chaak",
+    label: "BB Signal 03",
+    src: "https://player.vimeo.com/video/1193931027?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
+    stat: "03",
+    tc: "02:11:08"
+  }
 ];
 
 const TICKER_ITEMS = [
@@ -130,11 +147,19 @@ function ReelCard({
       {/* portrait video wrapper */}
       <div className="relative aspect-[9/16] overflow-hidden border border-white/10 group-hover:border-[#a0ef46]/40 transition-colors duration-500">
 
-        <video
-          src={clip.src}
-          className="h-full w-full object-cover grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-700"
-          autoPlay muted loop playsInline
-        />
+        {clip.src.startsWith("http") ? (
+          <iframe
+            src={`${clip.src}&background=1&autoplay=1&loop=1&muted=1`}
+            className="absolute inset-0 h-[101%] w-[101%] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-700 object-cover"
+            allow="autoplay"
+          />
+        ) : (
+          <video
+            src={clip.src}
+            className="h-full w-full object-cover grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-700"
+            autoPlay muted loop playsInline
+          />
+        )}
 
         {/* gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-black/30" />
@@ -312,6 +337,32 @@ export default function Vol1RecapExperience() {
           .obys-counter {
             font-variant-numeric: tabular-nums;
           }
+
+          /* Diagonal CTA Split Responsive Classes */
+          .cta-split-left {
+            clip-path: none;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+          }
+          .cta-split-right {
+            width: 100%;
+            position: relative;
+            z-index: 5;
+          }
+          @media (min-width: 768px) {
+            .cta-split-left {
+              clip-path: polygon(0 0, 70% 0, 57% 100%, 0 100%);
+              width: 100%;
+              position: absolute;
+              inset: 0;
+            }
+            .cta-split-right {
+              width: 100%;
+              position: absolute;
+              inset: 0;
+            }
+          }
         `}</style>
 
         {/* ── NOISE GRAIN ───────────────────────────────────────────────── */}
@@ -430,7 +481,7 @@ export default function Vol1RecapExperience() {
                   inView={heroTextInView}
                   delay={0.2}
                   stagger={0.06}
-                  className="font-sarpanch font-black uppercase text-white leading-[0.82] select-none"
+                  className="split-vol font-sarpanch font-black uppercase text-white leading-[0.82] select-none"
                 />
                 <style>{`.split-vol { font-size: clamp(5rem, 15vw, 12.5rem); }`}</style>
                 {/* inline style workaround */}
@@ -554,12 +605,12 @@ export default function Vol1RecapExperience() {
               </div>
               <span className="font-sarpanch font-black text-white/8 leading-none hidden md:block"
                 style={{ fontSize: "clamp(4rem, 12vw, 10rem)" }}>
-                04
+                03
               </span>
             </div>
 
             {/* staircase grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto relative">
               {reelClips.map((clip, i) => (
                 <ReelCard
                   key={clip.stat}
@@ -602,7 +653,7 @@ export default function Vol1RecapExperience() {
           >
             <span
               className="font-sarpanch font-black text-white opacity-[0.025] leading-none"
-              style={{ fontSize: "clamp(18rem, 50vw, 50rem)" }}
+              style={{ fontSize: "clamp(10rem, 40vw, 36rem)" }}
             >
               01
             </span>
@@ -618,7 +669,7 @@ export default function Vol1RecapExperience() {
                     animate={statementInView ? { y: "0%", opacity: 1 } : {}}
                     transition={{ duration: 1.2, delay: i * 0.18, ease: [0.76, 0, 0.24, 1] }}
                     className={`block font-sarpanch font-black uppercase leading-[0.82] ${colors[i]}`}
-                    style={{ fontSize: "clamp(3.5rem, 13vw, 11rem)" }}
+                    style={{ fontSize: "clamp(1.8rem, 7.5vw, 8rem)" }}
                   >
                     {word}
                   </motion.span>
@@ -687,7 +738,7 @@ function ReelSectionHeading() {
             animate={inView ? { y: "0%" } : {}}
             transition={{ duration: 1, delay: i * 0.12, ease: [0.76, 0, 0.24, 1] }}
             className="block font-sarpanch font-black uppercase leading-[0.82] text-white"
-            style={{ fontSize: "clamp(3rem, 9vw, 7rem)" }}
+            style={{ fontSize: "clamp(2.2rem, 7.5vw, 6rem)" }}
           >
             {line}
           </motion.span>
@@ -704,15 +755,11 @@ function CtaSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-black border-t border-white/8"
-      style={{ minHeight: "60vh" }}
+      className="relative overflow-hidden bg-black border-t border-white/8 min-h-[60vh] flex flex-col md:block"
     >
       {/* LEFT PANEL — black */}
-      <div
-        className="absolute inset-0 bg-black z-10"
-        style={{ clipPath: "polygon(0 0, 70% 0, 57% 100%, 0 100%)" }}
-      >
-        <div className="flex flex-col justify-center h-full px-6 md:px-16 py-20 max-w-[55%]">
+      <div className="cta-split-left bg-black py-16 md:py-0">
+        <div className="flex flex-col justify-center h-full px-6 md:px-16 w-full md:max-w-[450px] lg:max-w-[600px]">
           <div className="overflow-hidden mb-4">
             <motion.span
               initial={{ y: "110%" }}
@@ -730,7 +777,7 @@ function CtaSection() {
                 animate={inView ? { y: "0%" } : {}}
                 transition={{ duration: 1.0, delay: 0.1 + i * 0.12, ease: [0.76, 0, 0.24, 1] }}
                 className="block font-sarpanch font-black uppercase leading-[0.82] text-white"
-                style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}
+                style={{ fontSize: "clamp(2.2rem, 7.5vw, 6rem)" }}
               >
                 {line}
               </motion.span>
@@ -749,24 +796,24 @@ function CtaSection() {
       </div>
 
       {/* RIGHT PANEL — lime */}
-      <div className="absolute inset-0 bg-[#a0ef46] z-0">
-        <div className="flex flex-col justify-center h-full items-end pr-6 md:pr-16 py-20">
+      <div className="cta-split-right bg-[#a0ef46] py-16 md:py-0">
+        <div className="flex flex-col justify-center h-full items-start md:items-end px-6 md:pr-16 w-full md:max-w-[320px] lg:max-w-[380px] md:ml-auto md:mr-0">
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-end gap-5 ml-auto mr-0 w-full max-w-[38%]"
+            className="flex flex-col items-start md:items-end gap-5 w-full"
           >
-            <span className="font-sarpanch font-black uppercase text-black/20 leading-none text-right"
+            <span className="font-sarpanch font-black uppercase text-black/20 leading-none text-left md:text-right"
               style={{ fontSize: "clamp(4rem, 10vw, 9rem)" }}>
               BB
             </span>
-            <p className="font-proxima text-sm text-black/55 text-right leading-relaxed">
+            <p className="font-proxima text-sm text-black/55 text-left md:text-right leading-relaxed">
               Next signal coming.
               <br />
               Claim your spot.
             </p>
-            <div className="flex flex-col gap-3 items-end">
+            <div className="flex flex-col gap-3 items-start md:items-end">
               <Link href="/events" className="boombap-button bg-black text-[#a0ef46] border-black hover:bg-black/90">
                 <ScrambleText text="See Events" />
               </Link>

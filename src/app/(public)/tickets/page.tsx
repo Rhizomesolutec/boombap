@@ -1,25 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import MotionReveal from "../../components/ui/MotionReveal";
-import ScrambleText from "../../components/ui/ScrambleText";
-import type { TicketTier } from "../../lib/supabase";
-
-// ─── Ticket tiers — edit price/perks here when the event is confirmed ─────────
-const TICKET_TIERS: TicketTier[] = [
-  {
-    id: "general",
-    name: "General",
-    price: 100,           // 1 in paise
-    description: "Full access to the night. Standing floor.",
-    perks: ["Entry to the event", "Access to all performances"],
-    available: true,
-    quantity_limit: 4,
-  },
-];
+import type { TicketTier } from "../../../lib/supabase";
+import MotionReveal from "../../../components/ui/MotionReveal";
+import ScrambleText from "../../../components/ui/ScrambleText";
 
 // Utility: paise → readable rupee string
 function formatPrice(paise: number) {
@@ -56,6 +43,13 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
   const [qty, setQty] = useState(1);
   const [status, setStatus] = useState<BookingStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  const remaining = selectedTier.tickets_remaining !== undefined ? selectedTier.tickets_remaining : selectedTier.quantity_limit;
+  const maxAllowed = Math.min(selectedTier.max_per_order ?? 4, remaining);
+
+  useEffect(() => {
+    setQty((q) => Math.min(maxAllowed, Math.max(1, q)));
+  }, [maxAllowed]);
 
   const totalPaise = selectedTier.price * qty;
 
@@ -182,13 +176,13 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Order summary strip */}
-      <div className="flex items-center justify-between border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="flex items-center justify-between border border-white/10 bg-white/3 px-4 py-3">
         <div>
           <span className="font-proxima text-[9px] font-bold uppercase tracking-[0.3em] text-white/38">
             Order Summary
           </span>
-          <p className="mt-1 font-sarpanch text-lg font-black uppercase text-white">
-            {selectedTier.name} × {qty}
+          <p className="mt-1 font-sarpanch text-base font-black uppercase text-white">
+            {selectedTier.name} ({selectedTier.id}) × {qty}
           </p>
         </div>
         <span className="font-sarpanch text-2xl font-black text-primary">
@@ -206,25 +200,25 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
             id="qty-decrease"
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="flex h-11 w-11 items-center justify-center border border-white/14 bg-white/[0.04] font-sarpanch text-white transition hover:bg-white/10"
+            className="flex h-11 w-11 items-center justify-center border border-white/14 bg-white/4 font-sarpanch text-white transition hover:bg-white/10"
           >
             −
           </button>
-          <span className="flex h-11 w-14 items-center justify-center border-y border-white/14 bg-white/[0.02] font-sarpanch text-lg font-black text-white">
+          <span className="flex h-11 w-14 items-center justify-center border-y border-white/14 bg-white/2 font-sarpanch text-lg font-black text-white">
             {qty}
           </span>
           <button
             id="qty-increase"
             type="button"
-            onClick={() =>
-              setQty((q) => Math.min(selectedTier.quantity_limit, q + 1))
-            }
-            className="flex h-11 w-11 items-center justify-center border border-white/14 bg-white/[0.04] font-sarpanch text-white transition hover:bg-white/10"
+            onClick={() => {
+              setQty((q) => Math.min(maxAllowed, q + 1));
+            }}
+            className="flex h-11 w-11 items-center justify-center border border-white/14 bg-white/4 font-sarpanch text-white transition hover:bg-white/10"
           >
             +
           </button>
           <span className="ml-3 font-proxima text-[10px] text-white/30">
-            max {selectedTier.quantity_limit} per order
+            max {maxAllowed} per order
           </span>
         </div>
       </div>
@@ -249,10 +243,10 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
             onChange={(e) => set(e.target.value)}
             placeholder={placeholder}
             className="
-              w-full border border-white/14 bg-white/[0.04] px-4 py-3.5
+              w-full border border-white/14 bg-white/4 px-4 py-3.5
               font-proxima text-sm text-white placeholder:text-white/22
               outline-none transition-all
-              focus:border-primary/60 focus:bg-white/[0.07]
+              focus:border-primary/60 focus:bg-white/7
             "
           />
         </div>
@@ -300,8 +294,92 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TicketsPage() {
-  const [selectedTierId, setSelectedTierId] = useState("general");
-  const selectedTier = TICKET_TIERS.find((t) => t.id === selectedTierId)!;
+  const [tiers, setTiers] = useState<TicketTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTierId, setSelectedTierId] = useState<string>("");
+
+  useEffect(() => {
+    async function loadTiers() {
+      try {
+        const res = await fetch("/api/tickets?available=true");
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Failed to fetch tickets");
+        const list = json.tiers ?? [];
+        setTiers(list);
+        if (list.length > 0) {
+          const firstAvailable = list.find((t: TicketTier) => t.available);
+          setSelectedTierId(firstAvailable ? firstAvailable.id : list[0].id);
+        }
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTiers();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="relative min-h-screen overflow-hidden bg-black text-white">
+        <section className="relative isolate min-h-[72vh] overflow-hidden border-b border-white/10 px-6 pb-16 pt-36 md:px-10 md:pb-24 md:pt-44 animate-pulse">
+          <div className="absolute inset-0 -z-20 bg-linear-to-r from-black via-black/90 to-black/50" />
+          <div className="mx-auto flex max-w-7xl flex-col justify-end gap-4">
+            <div className="h-4 w-40 bg-white/10 rounded" />
+            <div className="h-20 w-80 bg-white/10 rounded" />
+            <div className="h-6 w-96 bg-white/10 rounded" />
+          </div>
+        </section>
+        <section className="relative overflow-hidden bg-black px-6 py-20 md:px-10 md:py-28">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+              <div className="flex flex-col gap-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="border border-white/10 bg-white/2.5 p-6 h-40 animate-pulse rounded-sm" />
+                ))}
+              </div>
+              <div className="border border-white/12 bg-white/2.5 p-6 h-96 animate-pulse rounded-sm" />
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="relative min-h-screen overflow-hidden bg-black text-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md border border-red-500/30 bg-red-500/5 p-8 rounded-sm">
+          <span className="text-3xl text-red-500">⚠</span>
+          <h2 className="mt-4 font-sarpanch text-xl font-black uppercase text-white">Failed to load booking</h2>
+          <p className="mt-2 font-proxima text-sm text-white/50">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="boombap-button mt-6"
+          >
+            <ScrambleText text="Try Again" />
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (tiers.length === 0) {
+    return (
+      <main className="relative min-h-screen overflow-hidden bg-black text-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md border border-white/10 bg-white/2.5 p-8 rounded-sm">
+          <h2 className="font-sarpanch text-xl font-black uppercase text-white">Tickets Coming Soon</h2>
+          <p className="mt-2 font-proxima text-sm text-white/50">Ticket sales for BOOMBAP Vol.1 are currently closed. Check back soon!</p>
+          <Link href="/" className="boombap-button mt-6">
+            <ScrambleText text="Back Home" />
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const selectedTier = tiers.find((t) => t.id === selectedTierId);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -378,22 +456,24 @@ export default function TicketsPage() {
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             {/* ── LEFT: tier cards ── */}
             <div className="flex flex-col gap-4">
-              {TICKET_TIERS.map((tier, i) => {
+              {tiers.map((tier, i) => {
                 const active = tier.id === selectedTierId;
+                const remaining = tier.tickets_remaining !== undefined ? tier.tickets_remaining : tier.quantity_limit;
+                const isSoldOut = !tier.available || remaining <= 0;
                 return (
                   <MotionReveal key={tier.id} delay={i * 0.07}>
                     <button
                       id={`tier-${tier.id}`}
                       type="button"
                       onClick={() => setSelectedTierId(tier.id)}
-                      disabled={!tier.available}
+                      disabled={isSoldOut}
                       className={`
                         group w-full text-left border p-6 transition-all duration-200 md:p-7
                         ${active
                           ? "border-primary bg-primary/8 shadow-[6px_6px_0_rgba(160,239,70,0.28)]"
-                          : "border-white/10 bg-white/[0.025] hover:border-white/22 hover:bg-white/[0.04]"
+                          : "border-white/10 bg-white/2.5 hover:border-white/22 hover:bg-white/4"
                         }
-                        ${!tier.available ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                        ${isSoldOut ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
                       `}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -412,8 +492,11 @@ export default function TicketsPage() {
                           </span>
                           <div>
                             <span className="font-proxima text-[9px] font-black uppercase tracking-[0.32em] text-white/40">
-                              {!tier.available ? "Sold Out" : "Available"}
+                              {isSoldOut ? "Sold Out" : "Available"}
                             </span>
+                            <div className="mt-1 font-proxima text-[10px] font-bold uppercase tracking-[0.25em] text-primary/80">
+                              {tier.id}
+                            </div>
                             <h3 className="mt-0.5 font-sarpanch text-2xl font-black uppercase text-white">
                               {tier.name}
                             </h3>
@@ -450,35 +533,37 @@ export default function TicketsPage() {
             </div>
 
             {/* ── RIGHT: booking form ── */}
-            <MotionReveal
-              delay={0.12}
-              className="sticky top-28 border border-white/12 bg-white/[0.025] p-6 md:p-8"
-            >
-              {/* Form header */}
-              <div className="mb-7 flex items-center justify-between border-b border-white/8 pb-6">
-                <div>
-                  <span className="font-proxima text-[9px] font-black uppercase tracking-[0.34em] text-primary">
-                    Your Booking
-                  </span>
-                  <h2 className="mt-2 font-sarpanch text-2xl font-black uppercase text-white">
-                    {selectedTier.name} Ticket
-                  </h2>
+            {selectedTier && (
+              <MotionReveal
+                delay={0.12}
+                className="sticky top-28 border border-white/12 bg-white/2.5 p-6 md:p-8"
+              >
+                {/* Form header */}
+                <div className="mb-7 flex items-center justify-between border-b border-white/8 pb-6">
+                  <div>
+                    <span className="font-proxima text-[9px] font-black uppercase tracking-[0.34em] text-primary">
+                      Your Booking · {selectedTier.id}
+                    </span>
+                    <h2 className="mt-2 font-sarpanch text-2xl font-black uppercase text-white">
+                      {selectedTier.name} Ticket
+                    </h2>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={selectedTierId}
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      className="font-sarpanch text-3xl font-black text-primary"
+                    >
+                      {formatPrice(selectedTier.price)}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={selectedTierId}
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    className="font-sarpanch text-3xl font-black text-primary"
-                  >
-                    {formatPrice(selectedTier.price)}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
 
-              <BookingForm selectedTier={selectedTier} />
-            </MotionReveal>
+                <BookingForm selectedTier={selectedTier} />
+              </MotionReveal>
+            )}
           </div>
         </div>
       </section>
@@ -512,7 +597,7 @@ export default function TicketsPage() {
               <MotionReveal
                 key={item.n}
                 delay={i * 0.07}
-                className="border border-white/10 bg-white/[0.02] p-6"
+                className="border border-white/10 bg-white/2 p-6"
               >
                 <span className="font-sarpanch text-sm font-black text-primary">
                   {item.n}.

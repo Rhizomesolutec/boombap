@@ -68,6 +68,11 @@ export default function ScrambleText({ text, className }: ScrambleTextProps) {
     }, FRAME_MS);
   }, [clearScramble, text]);
 
+  useEffect(() => {
+    setDisplayText(text);
+    clearScramble();
+  }, [text, clearScramble]);
+
   useEffect(() => clearScramble, [clearScramble]);
 
   return (

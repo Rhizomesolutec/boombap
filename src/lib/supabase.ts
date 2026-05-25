@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-// ─── Browser client (uses anon key — safe for frontend) ────────────────────────
+// ─── Browser client (uses anon key — safe for frontend) ───
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// ─── Server client (uses service-role key — only used in API routes) ──────────
+// ─── Server client (uses service-role key — only used in API routes) ───
 export function createServerSupabaseClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,16 +14,16 @@ export function createServerSupabaseClient() {
   )
 }
 
-// ─── TypeScript types that mirror our Supabase tables ─────────────────────────
-
 export type TicketTier = {
   id: string                 // e.g. 'general' | 'supporter' | 'vip'
-  name: string               // Display name
+  name: string
   price: number              // Amount in paise (₹499 = 49900)
   description: string
   perks: string[]
   available: boolean
-  quantity_limit: number     // Max tickets per order
+  quantity_limit: number
+  max_per_order?: number     // Max tickets allowed in a single order (default 4)
+  tickets_remaining?: number
 }
 
 export type Order = {
