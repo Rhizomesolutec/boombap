@@ -29,9 +29,9 @@ export default function MotionReveal({
       animate={
         float && !reduceMotion
           ? {
-              y: [0, -10, 0],
-              rotate: [0, -0.6, 0],
-            }
+            y: [0, -10, 0],
+            rotate: [0, -0.6, 0],
+          }
           : undefined
       }
       transition={{
@@ -42,19 +42,19 @@ export default function MotionReveal({
         delay,
         ...(float
           ? {
-              y: {
-                duration: 8,
-                repeat: Infinity,
-                repeatType: "mirror",
-                ease: "easeInOut",
-              },
-              rotate: {
-                duration: 8,
-                repeat: Infinity,
-                repeatType: "mirror",
-                ease: "easeInOut",
-              },
-            }
+            y: {
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "mirror",
+              ease: "easeInOut",
+            },
+            rotate: {
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "mirror",
+              ease: "easeInOut",
+            },
+          }
           : {}),
         ...transition,
       }}

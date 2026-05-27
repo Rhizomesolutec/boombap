@@ -84,7 +84,7 @@ export default function Header() {
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-6 md:h-28 md:px-16">
           <Link href="/" className="relative z-50 flex items-center justify-center group">
             <Image
-              src={isHeroHeader ? "/bmbp-black-logo.png" : "/bmbp-green-logo.png"}
+              src={"/bmbp-green-logo.png"}
               alt="BOOMBAP Logo"
               width={128}
               height={128}
@@ -101,13 +101,13 @@ export default function Header() {
             className="group relative z-50 flex h-11 w-11 flex-col items-center justify-center gap-[6px] md:h-12 md:w-12"
           >
             <span className={`block h-[2px] w-7 origin-center transition-all duration-500 ease-in-out md:w-8 ${
-              menuOpen ? "rotate-45 translate-y-[8px] bg-primary" : isHeroHeader ? "bg-black group-hover:bg-secondary" : "bg-primary group-hover:bg-secondary"
+              menuOpen ? "rotate-45 translate-y-[8px] bg-primary" : "bg-primary group-hover:bg-secondary"
             }`} />
             <span className={`block h-[2px] transition-all duration-300 ease-in-out ${
-              menuOpen ? "w-0 opacity-0 bg-primary" : isHeroHeader ? "w-5 bg-black group-hover:bg-secondary" : "w-5 bg-primary group-hover:bg-secondary"
+              menuOpen ? "w-0 opacity-0 bg-white" : "w-5 bg-white group-hover:bg-secondary"
             }`} />
             <span className={`block h-[2px] w-7 origin-center transition-all duration-500 ease-in-out md:w-8 ${
-              menuOpen ? "-rotate-45 translate-y-[-8px] bg-primary" : isHeroHeader ? "bg-black group-hover:bg-secondary" : "bg-primary group-hover:bg-secondary"
+              menuOpen ? "-rotate-45 translate-y-[-8px] bg-primary" : "bg-primary group-hover:bg-secondary"
             }`} />
           </button>
         </div>

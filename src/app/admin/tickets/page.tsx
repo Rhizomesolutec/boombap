@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Icon } from "@/src/components/ui/Icon";
+import { formatPrice } from "@/src/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Tier = {
@@ -19,19 +21,6 @@ type Tier = {
   sold_percentage?: number;
   total_revenue_rupees?: number;
 };
-
-// ─── Icon ─────────────────────────────────────────────────────────────────────
-function Icon({ d, size = 16, className = "" }: { d: string; size?: number; className?: string }) {
-  return (
-    <svg
-      width={size} height={size} viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" strokeWidth="1.8"
-      strokeLinecap="round" strokeLinejoin="round" className={className}
-    >
-      <path d={d} />
-    </svg>
-  );
-}
 
 // ─── Inline toggle switch ─────────────────────────────────────────────────────
 function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -261,9 +250,9 @@ export default function AdminTicketsPage() {
                 {/* Stats row */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { label: "Price", value: `₹${(tier.price / 100).toLocaleString("en-IN")}` },
+                    { label: "Price", value: formatPrice(tier.price) },
                     { label: "Sold", value: `${tier.total_sold ?? 0} / ${tier.quantity_limit}` },
-                    { label: "Revenue", value: `₹${(tier.total_revenue_rupees ?? 0).toLocaleString("en-IN")}` },
+                    { label: "Revenue", value: formatPrice((tier.total_revenue_rupees ?? 0) * 100) },
                     { label: "Max/Order", value: `${tier.max_per_order ?? 4}` },
                   ].map(({ label, value }) => (
                     <div key={label} className="rounded-sm bg-white/3 border border-white/6 px-3 py-2">
@@ -415,12 +404,12 @@ export default function AdminTicketsPage() {
                       placeholder="10000"
                       value={form.price}
                       onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                      className="w-full border border-white/10 bg-white/4 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-primary/50 transition-colors rounded-sm"
-                    />
-                    <p className="mt-1 text-[9px] text-white/25">
-                      {form.price ? `₹${(Number(form.price) / 100).toLocaleString("en-IN")}` : "₹0"}
-                    </p>
-                  </div>
+                    className="w-full border border-white/10 bg-white/4 px-3 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-primary/50 transition-colors rounded-sm"
+                  />
+                  <p className="mt-1 text-[9px] text-white/25">
+                    {form.price ? formatPrice(Number(form.price)) : "₹0"}
+                  </p>
+                </div>
                   <div>
                     <label htmlFor="tier-capacity" className="block text-[9px] font-bold uppercase tracking-[0.3em] text-white/35 mb-1.5">
                       Capacity <span className="text-primary">*</span>

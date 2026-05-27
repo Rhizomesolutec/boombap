@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import emailjs from "@emailjs/browser";
 import MotionReveal from "../ui/MotionReveal";
 import ScrambleText from "../ui/ScrambleText";
 
@@ -13,9 +14,11 @@ export default function ContactSection() {
   const [subject, setSubject] = useState<SubjectType>("General");
   const [message, setMessage] = useState("");
   
-  // simulated submission state: "idle" | "connecting" | "encrypting" | "sending" | "success" | "error"
-  const [submitState, setSubmitState] = useState<"idle" | "connecting" | "encrypting" | "sending" | "success">("idle");
+  // submission state: "idle" | "connecting" | "encrypting" | "sending" | "success" | "error"
+  const [submitState, setSubmitState] = useState<"idle" | "connecting" | "encrypting" | "sending" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [emailPromiseStatus, setEmailPromiseStatus] = useState<"pending" | "resolved" | "rejected" | null>(null);
+  const [apiError, setApiError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,9 +27,38 @@ export default function ContactSection() {
       return;
     }
     setErrorMsg("");
-    
-    // Start simulation sequence
+    setApiError("");
+    setEmailPromiseStatus("pending");
     setSubmitState("connecting");
+
+    const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+
+    emailjs.send(
+      serviceId!,
+      templateId!,
+      {
+        name,
+        from_name: name,
+        email,
+        reply_to: email,
+        subject,
+        message,
+      },
+      {
+        publicKey,
+      }
+    )
+    .then((response) => {
+      console.log("SUCCESS!", response.status, response.text);
+      setEmailPromiseStatus("resolved");
+    })
+    .catch((err) => {
+      console.error("FAILED...", err);
+      setApiError(err?.text || err?.message || "Unknown transmission failure.");
+      setEmailPromiseStatus("rejected");
+    });
   };
 
   useEffect(() => {
@@ -39,17 +71,23 @@ export default function ContactSection() {
       return () => clearTimeout(timer);
     }
     if (submitState === "sending") {
-      const timer = setTimeout(() => {
-        setSubmitState("success");
-        // Reset form
-        setName("");
-        setEmail("");
-        setMessage("");
-        setSubject("General");
-      }, 1000);
-      return () => clearTimeout(timer);
+      const interval = setInterval(() => {
+        if (emailPromiseStatus === "resolved") {
+          setSubmitState("success");
+          // Reset form
+          setName("");
+          setEmail("");
+          setMessage("");
+          setSubject("General");
+          clearInterval(interval);
+        } else if (emailPromiseStatus === "rejected") {
+          setSubmitState("error");
+          clearInterval(interval);
+        }
+      }, 200);
+      return () => clearInterval(interval);
     }
-  }, [submitState]);
+  }, [submitState, emailPromiseStatus]);
 
   return (
     <section id="contact" className="relative w-full overflow-hidden border-t border-white/5 bg-black py-24 md:py-32">
@@ -93,11 +131,8 @@ export default function ContactSection() {
                   Hotlines
                 </span>
                 <div className="mt-3 flex flex-col gap-2 font-sarpanch text-base font-bold text-white">
-                  <a href="mailto:sound@boombap.in" className="transition-colors hover:text-primary">
-                    sound@boombap.in
-                  </a>
-                  <a href="mailto:collab@boombap.in" className="transition-colors hover:text-primary">
-                    collab@boombap.in
+                  <a href="mailto:info@devilinsiderecords.in" className="transition-colors hover:text-primary">
+                    info@devilinsiderecords.in
                   </a>
                 </div>
               </div>
@@ -211,7 +246,7 @@ export default function ContactSection() {
                 )}
 
                 {/* Simulated Transmission Progress */}
-                {submitState !== "idle" && submitState !== "success" && (
+                {submitState !== "idle" && submitState !== "success" && submitState !== "error" && (
                   <motion.div
                     key="submitting-state"
                     className="flex min-h-[22rem] flex-col justify-between font-mono text-xs text-primary"
@@ -278,6 +313,33 @@ export default function ContactSection() {
                       className="boombap-button mt-4"
                     >
                       <ScrambleText text="SEND NEW SIGNAL" />
+                    </button>
+                  </motion.div>
+                )}
+
+                {/* Error State */}
+                {submitState === "error" && (
+                  <motion.div
+                    key="error-state"
+                    className="flex min-h-[22rem] flex-col items-center justify-center gap-6 text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className="flex h-16 w-16 items-center justify-center border border-red-500/50 bg-red-500/10 text-red-500 text-3xl">
+                      ⚠️
+                    </div>
+                    <h3 className="font-sarpanch text-2xl font-black uppercase text-red-500">
+                      TRANSMISSION FAILED
+                    </h3>
+                    <p className="max-w-xs font-proxima text-sm leading-relaxed text-white/50">
+                      {apiError || "Mainframe handshake lost. Please check your connection parameters and try again."}
+                    </p>
+                    <button
+                      onClick={() => setSubmitState("idle")}
+                      className="boombap-button border-red-500/35 hover:border-red-500/60 hover:bg-red-500/10 mt-4 text-red-400"
+                    >
+                      <ScrambleText text="RETRY TRANSMISSION" />
                     </button>
                   </motion.div>
                 )}

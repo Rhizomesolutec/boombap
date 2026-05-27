@@ -43,6 +43,7 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
   const [qty, setQty] = useState(1);
   const [status, setStatus] = useState<BookingStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   const remaining = selectedTier.tickets_remaining !== undefined ? selectedTier.tickets_remaining : selectedTier.quantity_limit;
   const maxAllowed = Math.min(selectedTier.max_per_order ?? 4, remaining);
@@ -56,6 +57,10 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
   const handlePay = useCallback(async () => {
     if (!name.trim() || !email.trim() || !phone.trim()) {
       setErrorMsg("Please fill in all fields.");
+      return;
+    }
+    if (!agreed) {
+      setErrorMsg("You must agree to the Terms & Conditions and policies to proceed.");
       return;
     }
 
@@ -144,7 +149,7 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
 
     // Reset loading state — modal is now in control
     setStatus("idle");
-  }, [name, email, phone, qty, selectedTier, totalPaise, status]);
+  }, [name, email, phone, qty, selectedTier, totalPaise, status, agreed]);
 
   // ── Success screen ──────────────────────────────────────────────────────────
   if (status === "success") {
@@ -252,6 +257,32 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
         </div>
       ))}
 
+      {/* Checkbox agreement */}
+      <div className="flex items-start gap-3 border border-white/8 bg-white/2 p-4">
+        <input
+          id="agree-terms"
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-black text-primary focus:ring-primary focus:ring-offset-black accent-primary cursor-pointer"
+        />
+        <label htmlFor="agree-terms" className="font-proxima text-xs leading-relaxed text-white/70 select-none cursor-pointer">
+          I agree to the{" "}
+          <span className="text-primary font-bold hover:underline">
+            Terms & Conditions
+          </span>
+          ,{" "}
+          <span className="text-primary font-bold hover:underline">
+            Privacy Policy
+          </span>
+          , and{" "}
+          <span className="text-primary font-bold hover:underline">
+            Cancellation & Refund Policy
+          </span>
+          . I acknowledge that transaction fees are borne by the cardholder and are non-refundable.
+        </label>
+      </div>
+
       {/* Error message */}
       <AnimatePresence>
         {errorMsg && (
@@ -272,8 +303,8 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
         id="pay-button"
         type="button"
         onClick={handlePay}
-        disabled={status === "loading"}
-        className="boombap-button w-full disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={status === "loading" || !agreed}
+        className="boombap-button w-full disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {status === "loading" ? (
           <span className="flex items-center gap-2">
