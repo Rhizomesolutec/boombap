@@ -11,7 +11,7 @@ const MARQUEE_TEXT =
 
 export default function HeroSection() {
   return (
-    <section className="vhs-frame relative h-[100svh] min-h-[100svh] w-full overflow-hidden bg-primary">
+    <section className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden bg-primary">
 
       {/* ── Scoped styles ─────────────────────────────────────────────────── */}
       <style>{`
@@ -27,34 +27,6 @@ export default function HeroSection() {
           to   { transform: translateX(-50%); }
         }
 
-        /* Film grain overlay via pseudo-element on parent */
-        .boombap-grain::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 4;
-          opacity: 0.045;
-          mix-blend-mode: overlay;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-          background-size: 180px 180px;
-        }
-
-        /* Vertical film-strip line decoration */
-        .boombap-filmstrip {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 1px;
-          background: repeating-linear-gradient(
-            180deg,
-            rgba(0,0,0,0.16) 0px,
-            rgba(0,0,0,0.16) 6px,
-            transparent 6px,
-            transparent 12px
-          );
-        }
-
         .boombap-scroll-cue__inner {
           animation: boomScrollPulse 1.8s ease-in-out infinite;
         }
@@ -63,44 +35,8 @@ export default function HeroSection() {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(7px); }
         }
-
-        .boombap-hero-scene canvas {
-          display: block;
-          height: 100%;
-          width: 100%;
-          touch-action: none;
-        }
       `}</style>
 
-      {/* ── Background ────────────────────────────────────────────────────── */}
-      <div className="absolute inset-0 z-0 boombap-grain">
-        <Image
-          fill
-          src="/peoples.png"
-          alt=""
-          sizes="100vw"
-          className="h-full w-full object-cover object-center opacity-[0.16] grayscale mix-blend-multiply"
-        />
-        {/* left fade */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/88 to-primary/45" />
-        {/* top & bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-primary/72" />
-        {/* subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.11]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(0,0,0,0.42) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.42) 1px, transparent 1px)",
-            backgroundSize: "80px 80px",
-          }}
-        />
-        {/* decorative film-strip lines */}
-        <div className="boombap-filmstrip" style={{ right: "calc(100% / 3 + 2px)" }} />
-        <div className="boombap-filmstrip" style={{ right: "calc(100% / 3 - 1px)" }} />
-      </div>
-
-      <div className="absolute inset-0 z-2 bg-radial-[circle_at_50%_44%] from-transparent via-primary/16 to-primary/78 pointer-events-none" />
-      <div className="absolute inset-0 z-2 bg-linear-to-b from-primary/30 via-transparent to-primary/72 pointer-events-none" />
       <Waves
         lineColor="#7246C1"
         lineWidth={1.6}

@@ -4,24 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-
-// ── Icons (inline SVG) ────────────────────────────────────────────────────────
-function Icon({ d, size = 18 }: { d: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={d} />
-    </svg>
-  );
-}
+import { Icon } from "@/src/components/ui/Icon";
 
 const NAV_ITEMS = [
   {

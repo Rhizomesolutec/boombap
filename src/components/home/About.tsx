@@ -31,10 +31,10 @@ export default function AboutLanding() {
               <p className="text-white/66 text-lg md:text-xl font-proxima font-light max-w-2xl leading-relaxed">
                 Coming from Under A Devil Inside, BOOMBAP is a digital underground space built around rap culture, live energy, and community.
               </p>
-              
+
               {/* Premium BOOMBAP Radio banner with live indicator and pattern overlay */}
               <div className="relative flex flex-col gap-3 border border-primary/30 bg-primary/[0.03] backdrop-blur-xs px-5 py-4 md:flex-row md:items-center md:justify-between overflow-hidden">
-                <div 
+                <div
                   className="absolute inset-0 opacity-[0.03] pointer-events-none"
                   style={{
                     backgroundImage: "repeating-linear-gradient(45deg, var(--color-primary) 0 1px, transparent 1px 10px)"
@@ -62,8 +62,8 @@ export default function AboutLanding() {
               {/* Enhanced Interactive Culture Points */}
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {culturePoints.map((item, idx) => (
-                  <div 
-                    key={item} 
+                  <div
+                    key={item}
                     className="group/item border border-white/10 bg-white/[0.02] backdrop-blur-xs p-4 transition-all duration-300 hover:border-primary/40 hover:bg-primary/[0.02]"
                   >
                     <span className="mb-3 block font-sarpanch text-xs text-primary/80 transition-colors group-hover/item:text-primary">
@@ -125,7 +125,7 @@ export default function AboutLanding() {
                   <span className="pointer-events-none absolute -right-6 -bottom-10 md:-right-8 md:-bottom-12 font-sarpanch text-[10rem] md:text-[13rem] font-black leading-none text-white/[0.025] select-none transition-transform duration-700 group-hover:scale-105">
                     DIR
                   </span>
-                  
+
                   <div className="absolute right-7 top-7 hidden h-24 w-24 items-center justify-center border border-white/10 bg-black/45 md:flex transition-colors group-hover:border-primary/30">
                     <Image
                       src="/DIR-logo.png"

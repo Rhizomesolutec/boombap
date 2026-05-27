@@ -5,6 +5,7 @@ import MerchSection from "../../components/home/MerchSection";
 import ContactSection from "../../components/home/ContactSection";
 import Experience from "../../components/home/Experience";
 import Gallery from "../../components/home/Gallery";
+import MHeroSection from "@/src/components/home/MHeroSection";
 
 export default function Home() {
 
@@ -14,7 +15,8 @@ export default function Home() {
 
       {/* ─── SECTION 0: HERO ─── */}
       <div className="sticky top-0 z-0 h-svh overflow-hidden">
-        <HeroSection />
+        {/* <HeroSection /> */}
+        <MHeroSection/>
       </div>
 
       <div className="relative z-10 bg-black">

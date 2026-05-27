@@ -48,12 +48,12 @@ export default function Experience() {
               </div>
             </div>
             <div>
-                <Link
-                  href="/tickets"
-                  className="boombap-button boombap-button--ghost"
-                >
-                  <ScrambleText text="Secure Tickets" />
-                </Link>
+              <Link
+                href="/tickets"
+                className="boombap-button boombap-button--ghost"
+              >
+                <ScrambleText text="Secure Tickets" />
+              </Link>
             </div>
           </MotionReveal>
         </div>

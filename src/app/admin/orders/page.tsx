@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@/src/components/ui/Icon";
+import { formatPrice, formatDate } from "@/src/lib/utils";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 interface Order {
@@ -18,23 +20,6 @@ interface Order {
   created_at: string;
   ticket_category: string;
 }
-
-// ─── ICON HELPER ──────────────────────────────────────────────────────────────
-const Icon = ({ d, size = 16 }: { d: string; size?: number }) => (
-  <svg
-    className="shrink-0"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d={d} />
-  </svg>
-);
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -122,23 +107,7 @@ export default function AdminOrdersPage() {
     fetchKPIs();
   }, []);
 
-  const formatPrice = (paise: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(paise / 100);
-  };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-auto space-y-6">
