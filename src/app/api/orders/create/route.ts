@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // ── 1. Fetch the real tier price from DB ───────────────────────────────
     const { data: tier, error: tierError } = await supabase
       .from('ticket_tiers')
-      .select('price, available, tickets_remaining, max_per_order')
+      .select('price, available, quantity_limit, max_per_order')
       .eq('id', ticket_tier)
       .single()
 
@@ -36,7 +36,18 @@ export async function POST(req: NextRequest) {
     if (!tier.available) {
       return NextResponse.json({ error: 'This ticket tier is no longer available.' }, { status: 409 })
     }
-    if (tier.tickets_remaining !== null && quantity > tier.tickets_remaining) {
+
+    // Compute remaining tickets the same way as /api/tickets
+    const { data: soldOrders } = await supabase
+      .from('orders')
+      .select('quantity')
+      .eq('ticket_tier', ticket_tier)
+      .eq('status', 'paid')
+
+    const sold = (soldOrders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0)
+    const ticketsRemaining = Math.max(0, tier.quantity_limit - sold)
+
+    if (quantity > ticketsRemaining) {
       return NextResponse.json({ error: 'Not enough tickets remaining.' }, { status: 409 })
     }
     const maxPerOrder = tier.max_per_order ?? 4
