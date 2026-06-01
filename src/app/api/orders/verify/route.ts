@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     // ── Mark the order as paid in Supabase ───────────────────────────────────
     const supabase = createServerSupabaseClient()
-    const { error: dbError } = await supabase
+    const { data: order, error: dbError } = await supabase
       .from('orders')
       .update({
         status: 'paid',
@@ -34,10 +34,25 @@ export async function POST(req: NextRequest) {
         razorpay_signature,
       })
       .eq('razorpay_order_id', razorpay_order_id)
+      .select('ticket_tier, quantity')
+      .single()
 
     if (dbError) {
       console.error('Supabase update error:', dbError)
       return NextResponse.json({ error: 'Order update failed.' }, { status: 500 })
+    }
+
+    // ── Decrement ticket inventory ────────────────────────────────────────────
+    // Use rpc to safely decrement so concurrent requests don't race
+    if (order?.ticket_tier && order?.quantity) {
+      const { error: inventoryError } = await supabase.rpc('decrement_tickets', {
+        tier_id: order.ticket_tier,
+        qty: order.quantity,
+      })
+      if (inventoryError) {
+        // Non-fatal — order is paid; log and continue
+        console.error('Inventory decrement error:', inventoryError)
+      }
     }
 
     return NextResponse.json({ success: true })

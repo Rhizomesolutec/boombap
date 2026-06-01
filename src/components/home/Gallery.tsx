@@ -27,9 +27,9 @@ export default function Gallery() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { img: '/gallery1.jpg', tag: 'CULTURE', title: 'Street Soul' },
-            { img: '/gallery2.jpg', tag: 'GEAR', title: 'Analog Vibe' },
-            { img: '/gallery3.jpg', tag: 'NIGHTS', title: 'Neon Pulse' },
+            { img: '/recaps/gallery1.jpg', tag: 'CULTURE', title: 'Street Soul' },
+            { img: '/recaps/gallery2.jpg', tag: 'GEAR', title: 'Analog Vibe' },
+            { img: '/recaps/gallery3.jpg', tag: 'NIGHTS', title: 'Neon Pulse' },
           ].map((item, idx) => (
             <MotionReveal
               key={item.title}
