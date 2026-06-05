@@ -8,6 +8,7 @@ type MotionRevealProps = HTMLMotionProps<"div"> & {
   as?: "div" | "span" | "h1" | "section";
   delay?: number;
   float?: boolean;
+  distance?: number;
 };
 
 export default function MotionReveal({
@@ -15,6 +16,7 @@ export default function MotionReveal({
   children,
   delay = 0,
   float = false,
+  distance = 32,
   transition,
   ...props
 }: MotionRevealProps) {
@@ -23,38 +25,38 @@ export default function MotionReveal({
 
   return (
     <MotionTag
-      initial={reduceMotion ? false : { opacity: 0, y: float ? 0 : 20 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: float ? undefined : 0 }}
-      viewport={{ once: true, amount: 0.22 }}
+      initial={reduceMotion ? false : { opacity: 0, y: float ? 0 : distance, filter: "blur(4px)" }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: float ? undefined : 0, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.18 }}
       animate={
         float && !reduceMotion
           ? {
-            y: [0, -10, 0],
-            rotate: [0, -0.6, 0],
-          }
+              y: [0, -10, 0],
+              rotate: [0, -0.6, 0],
+            }
           : undefined
       }
       transition={{
         type: "spring",
-        damping: 25,
-        stiffness: 80,
-        mass: 1,
+        damping: 22,
+        stiffness: 70,
+        mass: 1.1,
         delay,
         ...(float
           ? {
-            y: {
-              duration: 8,
-              repeat: Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            },
-            rotate: {
-              duration: 8,
-              repeat: Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            },
-          }
+              y: {
+                duration: 8,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              },
+              rotate: {
+                duration: 8,
+                repeat: Infinity,
+                repeatType: "mirror",
+                ease: "easeInOut",
+              },
+            }
           : {}),
         ...transition,
       }}

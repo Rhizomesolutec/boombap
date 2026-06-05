@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createServerSupabaseClient } from '@/src/lib/supabase'
+import { sendOrderConfirmationEmail } from '@/src/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
         razorpay_signature,
       })
       .eq('razorpay_order_id', razorpay_order_id)
-      .select('ticket_tier, quantity')
+      .select('ticket_tier, quantity, amount_paise, buyer_name, buyer_email')
       .single()
 
     if (dbError) {
@@ -53,6 +54,25 @@ export async function POST(req: NextRequest) {
         // Non-fatal — order is paid; log and continue
         console.error('Inventory decrement error:', inventoryError)
       }
+    }
+
+    // ── Send confirmation email ───────────────────────────────────────────────
+    if (order?.buyer_email && order?.buyer_name) {
+      const { data: tier } = await supabase
+        .from('ticket_tiers')
+        .select('name')
+        .eq('id', order.ticket_tier)
+        .single()
+
+      await sendOrderConfirmationEmail({
+        to: order.buyer_email,
+        buyerName: order.buyer_name,
+        tierName: tier?.name ?? order.ticket_tier,
+        quantity: order.quantity,
+        amountPaise: order.amount_paise,
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+      })
     }
 
     return NextResponse.json({ success: true })
