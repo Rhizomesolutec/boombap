@@ -290,6 +290,32 @@ body {
   scrollbar-width: none;
 }
 
+/* ─── FlickCards ─────────────────────────────────────────────────── */
+[data-flick-cards-init] {
+  cursor: grab;
+}
+
+[data-flick-cards-init][data-flick-drag-status="grab"] {
+  cursor: grab;
+}
+
+[data-flick-cards-init][data-flick-drag-status="grabbing"] {
+  cursor: grabbing;
+}
+
+[data-flick-cards-init][data-flick-drag-status="grabbing"] * {
+  cursor: grabbing !important;
+}
+
+[data-flick-dragger] {
+  cursor: inherit;
+}
+
+/* Active accent bar */
+[data-flick-cards-item][data-flick-cards-item-status="active"] [data-flick-accent] {
+  background: linear-gradient(90deg, #A0EF46, #7246C1) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   *,
