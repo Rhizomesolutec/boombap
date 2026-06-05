@@ -10,7 +10,7 @@ function ScanLine() {
   return (
     <div
       aria-hidden
-      className="absolute inset-x-0 h-[1px] pointer-events-none z-20 opacity-30"
+      className="absolute inset-x-0 h-px pointer-events-none z-20 opacity-30"
       style={{
         background: "linear-gradient(90deg, transparent, #a0ef46, transparent)",
         animation: "scanDown 3s linear infinite",

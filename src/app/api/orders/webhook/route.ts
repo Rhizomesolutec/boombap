@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createServerSupabaseClient } from '@/src/lib/supabase'
+import { sendOrderConfirmationEmail } from '@/src/lib/email'
 
 /**
  * POST /api/orders/webhook
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
           razorpay_payment_id: paymentId,
         })
         .eq('razorpay_order_id', orderId)
-        .select('ticket_tier, quantity')
+        .select('ticket_tier, quantity, amount_paise, buyer_name, buyer_email')
         .single()
 
       if (updateError) {
@@ -84,6 +85,27 @@ export async function POST(req: NextRequest) {
         if (inventoryError) {
           console.error('Webhook: inventory decrement error:', inventoryError)
         }
+      }
+
+      // ── Send confirmation email (webhook is fallback — verify may not have run) ──
+      // The existing?.status check at the top already returns early if 'paid',
+      // so reaching here means this webhook is the first to confirm the order.
+      if (order?.buyer_email && order?.buyer_name) {
+        const { data: tier } = await supabase
+          .from('ticket_tiers')
+          .select('name')
+          .eq('id', order.ticket_tier)
+          .single()
+
+        await sendOrderConfirmationEmail({
+          to: order.buyer_email,
+          buyerName: order.buyer_name,
+          tierName: tier?.name ?? order.ticket_tier,
+          quantity: order.quantity,
+          amountPaise: order.amount_paise,
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
+        })
       }
 
       return NextResponse.json({ received: true })
