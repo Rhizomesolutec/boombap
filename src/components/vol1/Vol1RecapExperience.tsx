@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   motion,
   useReducedMotion,
@@ -13,13 +13,14 @@ import {
   useInView,
 } from "framer-motion";
 import ScrambleText from "../../components/ui/ScrambleText";
+import TrueFocus from "./TrueFocus";
 
 /* ─────────────────────────────────────────────────────────────── */
 /*  DATA                                                           */
 /* ─────────────────────────────────────────────────────────────── */
 
-const recapVideo =
-  "https://player.vimeo.com/video/1193920399?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0";
+const HERO_VIDEO =
+  "https://player.vimeo.com/video/1198957759?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0";
 
 const reelClips = [
   {
@@ -27,22 +28,31 @@ const reelClips = [
     label: "BB Signal 01",
     src: "https://player.vimeo.com/video/1193929856?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
     stat: "01",
-    tc: "00:00:00"
+    tc: "00:00:00",
+    desc: "Bass-forward set that opened the night",
   },
   {
     title: "Joker Malabari",
     label: "BB Signal 02",
     src: "https://player.vimeo.com/video/1193930603?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
     stat: "02",
-    tc: "00:47:22"
+    tc: "00:47:22",
+    desc: "Crowd energy peaking mid-night",
   },
   {
     title: "Chaak",
     label: "BB Signal 03",
     src: "https://player.vimeo.com/video/1193931027?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479",
     stat: "03",
-    tc: "02:11:08"
-  }
+    tc: "02:11:08",
+    desc: "The room at its absolute loudest",
+  },
+];
+
+const STATS = [
+  { num: "4", unit: "HRS", label: "Live" },
+  { num: "01", unit: "NIGHT", label: "Archive" },
+  { num: "∞", unit: "BPM", label: "Felt" },
 ];
 
 const TICKER_ITEMS = [
@@ -55,151 +65,130 @@ const TICKER_ITEMS = [
   "BOOMBAP SIGNAL",
 ];
 
-/* ─────────────────────────────────────────────────────────────── */
-/*  SPLIT TEXT — character level stagger (Obys signature)         */
-/* ─────────────────────────────────────────────────────────────── */
-
-function SplitReveal({
-  text,
-  className = "",
-  delay = 0,
-  stagger = 0.035,
-  inView = true,
-}: {
-  text: string;
-  className?: string;
-  delay?: number;
-  stagger?: number;
-  inView?: boolean;
-}) {
-  return (
-    <span className={`inline-flex flex-wrap ${className}`} aria-label={text}>
-      {text.split("").map((char, i) => (
-        <span key={i} className="overflow-hidden inline-block">
-          <motion.span
-            className="inline-block"
-            initial={{ y: "110%", opacity: 0 }}
-            animate={inView ? { y: "0%", opacity: 1 } : { y: "110%", opacity: 0 }}
-            transition={{
-              duration: 0.75,
-              delay: delay + i * stagger,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
-        </span>
-      ))}
-    </span>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────── */
-/*  MAGNETIC CARD HOOK                                             */
+/*  REEL CARD                                                       */
 /* ─────────────────────────────────────────────────────────────── */
-
-function useMagnet(strength = 0.22) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 220, damping: 22 });
-  const sy = useSpring(y, { stiffness: 220, damping: 22 });
-
-  const onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - r.left - r.width / 2) * strength);
-    y.set((e.clientY - r.top - r.height / 2) * strength);
-  };
-
-  const onMouseLeave = () => { x.set(0); y.set(0); };
-
-  return { sx, sy, onMouseMove, onMouseLeave };
-}
 
 function ReelCard({
   clip,
   index,
-  reduceMotion,
 }: {
   clip: (typeof reelClips)[number];
   index: number;
-  reduceMotion: boolean | null;
 }) {
-  const mag = useMagnet(0.18);
   const cardRef = useRef(null);
-  const inView = useInView(cardRef, { once: true, margin: "-60px" });
+  const inView = useInView(cardRef, { once: true, margin: "-80px" });
+  const [hovered, setHovered] = useState(false);
 
   return (
     <motion.article
       ref={cardRef}
-      {...(!reduceMotion ? {
-        style: { x: mag.sx, y: mag.sy },
-        onMouseMove: mag.onMouseMove,
-        onMouseLeave: mag.onMouseLeave,
-      } : {})}
-      initial={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }}
-      animate={inView
-        ? { opacity: 1, clipPath: "inset(0% 0 0 0)" }
-        : {}
-      }
-      transition={{ duration: 1.1, delay: index * 0.14, ease: [0.76, 0, 0.24, 1] }}
-      className={`stair-${index} card-hover group relative cursor-pointer`}
+      initial={{ opacity: 0, y: 60, clipPath: "inset(100% 0 0 0)" }}
+      animate={inView ? { opacity: 1, y: 0, clipPath: "inset(0% 0 0 0)" } : {}}
+      transition={{ duration: 1.1, delay: index * 0.15, ease: [0.76, 0, 0.24, 1] }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative group cursor-none"
+      data-cursor
     >
-      {/* portrait video wrapper */}
-      <div className="relative aspect-[9/16] overflow-hidden border border-white/10 group-hover:border-[#a0ef46]/40 transition-colors duration-500">
+      {/* number — large ghost behind card */}
+      <span
+        className="absolute -top-8 -left-3 font-sarpanch font-black text-white pointer-events-none select-none z-0 transition-opacity duration-500"
+        style={{
+          fontSize: "clamp(4rem, 10vw, 8rem)",
+          opacity: hovered ? 0.06 : 0.03,
+          lineHeight: 1,
+        }}
+      >
+        {clip.stat}
+      </span>
 
-        {clip.src.startsWith("http") ? (
-          <iframe
-            src={`${clip.src}&background=1&autoplay=1&loop=1&muted=1`}
-            className="absolute inset-0 h-[101%] w-[101%] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-700 object-cover"
-            allow="autoplay"
-          />
-        ) : (
-          <video
-            src={clip.src}
-            className="h-full w-full object-cover grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-700"
-            autoPlay muted loop playsInline
-          />
-        )}
+      {/* portrait video */}
+      <div className="relative aspect-[9/16] overflow-hidden bg-black/50 z-10"
+        style={{ border: hovered ? "1px solid rgba(160,239,70,0.3)" : "1px solid rgba(255,255,255,0.08)", transition: "border-color 0.4s" }}
+      >
+        <iframe
+          src={`${clip.src}&background=1&autoplay=1&loop=1&muted=1`}
+          className="absolute inset-0 w-full h-full pointer-events-none transition-all duration-700"
+          style={{
+            filter: hovered ? "grayscale(0) brightness(1.05)" : "grayscale(0.6) brightness(0.85)",
+            transform: hovered ? "scale(1.04)" : "scale(1)",
+          }}
+          allow="autoplay"
+        />
 
-        {/* gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-black/30" />
+        {/* grade */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/10 to-black/40 pointer-events-none" />
 
-        {/* timecode top-right */}
+        {/* tc top right */}
         <div className="absolute top-4 right-4 z-10">
-          <span className="font-proxima text-[7px] uppercase tracking-[0.3em] text-white/40">
-            {clip.tc}
-          </span>
+          <span className="font-proxima text-[7px] uppercase tracking-[0.3em] text-white/30">{clip.tc}</span>
         </div>
 
-        {/* number badge — left side rotated */}
+        {/* lime number badge */}
         <div className="absolute top-4 left-4 z-10">
-          <span className="font-sarpanch text-xs font-black text-[#a0ef46]">
-            {clip.stat}
-          </span>
+          <span className="font-sarpanch text-xs font-black text-[#a0ef46]">{clip.stat}</span>
         </div>
 
-        {/* bottom info — slides up on hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-          <span className="font-proxima text-[7px] uppercase tracking-[0.35em] text-[#a0ef46]">
-            {clip.label}
-          </span>
-          <h3 className="mt-2 font-sarpanch text-xl font-black uppercase leading-none text-white">
-            {clip.title}
-          </h3>
+        {/* bottom info */}
+        <div
+          className="absolute bottom-0 left-0 right-0 p-5 z-10 transition-transform duration-500"
+          style={{ transform: hovered ? "translateY(0)" : "translateY(6px)" }}
+        >
+          <span className="font-proxima text-[7px] uppercase tracking-[0.35em] text-[#a0ef46]">{clip.label}</span>
+          <h3 className="mt-1.5 font-sarpanch text-xl font-black uppercase leading-none text-white">{clip.title}</h3>
+          <p
+            className="font-proxima text-xs text-white/40 mt-2 transition-all duration-400"
+            style={{ opacity: hovered ? 1 : 0, transform: hovered ? "translateY(0)" : "translateY(4px)" }}
+          >
+            {clip.desc}
+          </p>
         </div>
 
-        {/* hover: thin lime bottom bar — sweep */}
-        <div className="absolute bottom-0 left-0 h-[2px] w-0 group-hover:w-full bg-[#a0ef46] transition-all duration-700 z-20" />
-
-        {/* hover: full-screen number overlay (Obys card hover style) */}
-        <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <span className="font-sarpanch font-black text-white/5 leading-none select-none"
-            style={{ fontSize: "clamp(5rem, 15vw, 9rem)" }}>
-            {clip.stat}
-          </span>
-        </div>
+        {/* hover: lime sweep bottom bar */}
+        <div
+          className="absolute bottom-0 left-0 h-[2px] bg-[#a0ef46] z-20 transition-all duration-700"
+          style={{ width: hovered ? "100%" : "0%" }}
+        />
       </div>
     </motion.article>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/*  STAT COUNTER                                                    */
+/* ─────────────────────────────────────────────────────────────── */
+
+function StatBlock({ stat, index }: { stat: (typeof STATS)[number]; index: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <div ref={ref} className="flex flex-col items-center gap-1 relative">
+      <div className="overflow-hidden">
+        <motion.div
+          initial={{ y: "110%" }}
+          animate={inView ? { y: "0%" } : {}}
+          transition={{ duration: 0.9, delay: index * 0.12, ease: [0.76, 0, 0.24, 1] }}
+          className="flex items-baseline gap-2"
+        >
+          <span className="font-sarpanch font-black text-white" style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}>
+            {stat.num}
+          </span>
+          <span className="font-sarpanch font-black text-[#a0ef46]" style={{ fontSize: "clamp(0.9rem, 2.5vw, 1.8rem)" }}>
+            {stat.unit}
+          </span>
+        </motion.div>
+      </div>
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+        className="font-proxima text-[9px] uppercase tracking-[0.4em] text-white/30"
+      >
+        {stat.label}
+      </motion.span>
+    </div>
   );
 }
 
@@ -207,31 +196,45 @@ function ReelCard({
 /*  PAGE                                                           */
 /* ─────────────────────────────────────────────────────────────── */
 
+const HERO_VIDEOS = [
+  HERO_VIDEO,
+  "https://player.vimeo.com/video/1198957819?background=1&autoplay=1&loop=1&muted=1&title=0&byline=0&portrait=0",
+];
+
 export default function Vol1RecapExperience() {
   const reduceMotion = useReducedMotion();
 
-  // Global scroll progress.
   const { scrollYProgress } = useScroll();
   const smoothScroll = useSpring(scrollYProgress, { stiffness: 55, damping: 18 });
   const progressWidth = useTransform(smoothScroll, [0, 1], ["0%", "100%"]);
 
-  /* hero section scroll */
+  /* hero scroll */
   const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress: hp } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroVideoY = useTransform(hp, [0, 1], ["0%", "40%"]);
-  const heroVolY = useTransform(hp, [0, 1], ["0%", "-35%"]);
-  const heroNumY = useTransform(hp, [0, 1], ["0%", "25%"]);
-  const heroScale = useTransform(hp, [0, 1], [1, 0.92]);
+  const { scrollYProgress: hp } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroVideoY = useTransform(hp, [0, 1], ["0%", "30%"]);
+  const heroBrightness = useTransform(hp, [0, 1], [0.55, 0.25]);
+  const heroContentY = useTransform(hp, [0, 1], ["0%", "20%"]);
 
-  /* editorial statement ref */
-  const statementRef = useRef(null);
-  const statementInView = useInView(statementRef, { once: true, margin: "-100px" });
+  /* hero video switcher */
+  const [activeVideo, setActiveVideo] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveVideo((v) => (v + 1) % HERO_VIDEOS.length);
+    }, 9000);
+    return () => clearInterval(id);
+  }, []);
 
-  /* hero text always visible — loader is now global */
-  const heroTextInView = true;
+  /* statement ref */
+  const statRef = useRef(null);
+  const statInView = useInView(statRef, { once: true, margin: "-100px" });
+
+  /* stats section */
+  const statsRef = useRef(null);
+  const statsInView = useInView(statsRef, { once: true, margin: "-80px" });
+
+  /* reels heading */
+  const reelsHeadRef = useRef(null);
+  const reelsHeadInView = useInView(reelsHeadRef, { once: true, margin: "-80px" });
 
   return (
     <>
@@ -240,312 +243,263 @@ export default function Vol1RecapExperience() {
 
         {/* ── GLOBAL STYLES ─────────────────────────────────────────────── */}
         <style>{`
-          /* Ticker loop */
           @keyframes tickerScroll {
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
           }
-          .ticker-inner { animation: tickerScroll 22s linear infinite; }
-          .ticker-inner:hover { animation-play-state: paused; }
-          .ticker-inner-rev { animation: tickerScroll 28s linear infinite reverse; }
+          .ticker-inner     { animation: tickerScroll 22s linear infinite; }
+          .ticker-inner-rev { animation: tickerScroll 30s linear infinite reverse; }
+          .ticker-inner:hover, .ticker-inner-rev:hover { animation-play-state: paused; }
 
-          /* Pulse */
-          @keyframes pulse {
-            0%,100% { opacity:1; transform:scale(1); }
-            50%      { opacity:0.5; transform:scale(0.8); }
+          @keyframes scrollY {
+            0%   { transform: translateY(0);   opacity: 1; }
+            50%  { transform: translateY(12px); opacity: 0.3; }
+            100% { transform: translateY(0);   opacity: 1; }
           }
 
-          /* Staircase offsets */
+          /* Grain overlay */
+          .grain::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 500;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            opacity: 0.032;
+          }
+
+          /* Staircase */
           @media (min-width: 768px) {
             .stair-0 { margin-top: 0; }
-            .stair-1 { margin-top: 14%; }
-            .stair-2 { margin-top: 28%; }
-            .stair-3 { margin-top: 42%; }
+            .stair-1 { margin-top: 15%; }
+            .stair-2 { margin-top: 30%; }
           }
 
           /* Corner brackets */
-          .bracket::before,
-          .bracket::after {
-            content: "";
+          .bracket::before, .bracket::after {
+            content: '';
             position: absolute;
-            width: 14px; height: 14px;
-            border-color: #a0ef46;
+            width: 16px; height: 16px;
+            border-color: rgba(160,239,70,0.5);
             border-style: solid;
           }
-          .bracket::before {
-            top: -1px; left: -1px;
-            border-width: 1.5px 0 0 1.5px;
-          }
-          .bracket::after {
-            bottom: -1px; right: -1px;
-            border-width: 0 1.5px 1.5px 0;
-          }
+          .bracket::before { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
+          .bracket::after  { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
 
-          /* Hover underline sweep */
-          .underline-sweep {
+          /* Line sweep hover */
+          .line-hover {
             background: linear-gradient(90deg, #a0ef46, #a0ef46) no-repeat bottom left;
             background-size: 0% 1.5px;
-            transition: background-size .5s cubic-bezier(0.16,1,0.3,1);
+            transition: background-size 0.5s cubic-bezier(0.16,1,0.3,1);
+            padding-bottom: 2px;
           }
-          .underline-sweep:hover { background-size: 100% 1.5px; }
+          .line-hover:hover { background-size: 100% 1.5px; }
 
-          /* Rotated sidebar text */
-          .rotate-sidebar {
+          /* Vertical text */
+          .v-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
             transform: rotate(180deg);
           }
 
-          /* Card lift shadow */
-          .card-hover {
-            transition: box-shadow .5s ease;
-          }
-          .card-hover:hover {
-            box-shadow: 0 32px 80px -12px rgba(160,239,70,.22);
-          }
-
-          /* Line through text on hover */
-          .line-through-hover {
-            position: relative;
-          }
-          .line-through-hover::after {
-            content:'';
-            position:absolute;
-            left:0;right:0;
-            top:50%;
-            height:1.5px;
-            background:#a0ef46;
-            transform:scaleX(0);
-            transform-origin:left;
-            transition:transform .5s cubic-bezier(0.16,1,0.3,1);
-          }
-          .line-through-hover:hover::after { transform:scaleX(1); }
-
-          /* Noise grain overlay */
-          .grain::before {
-            content:'';
-            position:fixed;
-            inset:0;
-            pointer-events:none;
-            z-index:200;
-            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            background-size: 200px 200px;
-            opacity:.035;
+          /* Scanlines on video */
+          .scanlines {
+            background: repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(0,0,0,0.03) 2px,
+              rgba(0,0,0,0.03) 4px
+            );
           }
 
-          /* Obys-style number counter */
-          .obys-counter {
-            font-variant-numeric: tabular-nums;
+          /* Horizontal scrollable reel */
+          .reel-h-scroll {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
           }
+          .reel-h-scroll::-webkit-scrollbar { display: none; }
 
-          /* Diagonal CTA Split Responsive Classes */
-          .cta-split-left {
-            clip-path: none;
-            width: 100%;
-            position: relative;
-            z-index: 10;
+          /* Marquee line */
+          @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
           }
-          .cta-split-right {
-            width: 100%;
-            position: relative;
-            z-index: 5;
-          }
+          .marquee { animation: marquee 18s linear infinite; }
+          .marquee-rev { animation: marquee 24s linear infinite reverse; }
+
+          /* CTA split panels */
           @media (min-width: 768px) {
             .cta-split-left {
-              clip-path: polygon(0 0, 70% 0, 57% 100%, 0 100%);
-              width: 100%;
               position: absolute;
-              inset: 0;
+              top: 0; left: 0; bottom: 0;
+              width: 58%;
+              display: flex;
+              align-items: center;
+              z-index: 10;
             }
             .cta-split-right {
-              width: 100%;
               position: absolute;
-              inset: 0;
+              top: 0; right: 0; bottom: 0;
+              width: 42%;
+              display: flex;
+              align-items: center;
+              z-index: 5;
             }
+          }
+
+          /* Underline sweep */
+          .underline-sweep {
+            background: linear-gradient(90deg, currentColor, currentColor) no-repeat bottom left;
+            background-size: 0% 1px;
+            transition: background-size 0.4s cubic-bezier(0.16,1,0.3,1);
+            padding-bottom: 1px;
+          }
+          .underline-sweep:hover { background-size: 100% 1px; }
+
+          /* Blink dot */
+          @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+          .blink { animation: blink 1.1s step-end infinite; }
+
+          /* Number counter font */
+          .tabular { font-variant-numeric: tabular-nums; }
+
+          /* Neon flicker rare */
+          @keyframes neon-flicker {
+            0%,18%,20%,50%,52%,100% { opacity: 1; }
+            19%,51% { opacity: 0.6; }
           }
         `}</style>
 
-        {/* ── NOISE GRAIN ───────────────────────────────────────────────── */}
         <div className="grain" aria-hidden />
 
-        {/* ── TOP PROGRESS BAR ──────────────────────────────────────────── */}
+        {/* ── PROGRESS BAR ────────────────────────────────────────────── */}
         <motion.div
-          className="fixed top-0 left-0 h-[2px] bg-[#a0ef46] z-[500] origin-left"
+          className="fixed top-0 left-0 h-[2px] bg-[#a0ef46] z-[600] origin-left"
           style={{ width: progressWidth }}
         />
 
-        {/* ── VERTICAL SCROLL RULER ─────────────────────────────────────── */}
-        <div className="fixed right-5 top-1/2 -translate-y-1/2 z-50 h-32 w-px bg-white/10 hidden md:block">
-          <motion.div
-            className="w-full bg-[#a0ef46] origin-top"
-            style={{ scaleY: smoothScroll, height: "100%" }}
-          />
+        {/* ── SIDE RULER ─────────────────────────────────────────────── */}
+        <div className="fixed right-5 top-1/2 -translate-y-1/2 z-50 h-28 w-px bg-white/8 hidden md:block">
+          <motion.div className="w-full bg-[#a0ef46] origin-top" style={{ scaleY: smoothScroll, height: "100%" }} />
         </div>
 
-        {/* ══════════════════════════════════════════════════════════════════
-             HERO — BROADCAST MONITOR LAYOUT
-           ══════════════════════════════════════════════════════════════════ */}
-        <section
-          ref={heroRef}
-          className="relative min-h-[100svh] overflow-hidden bg-black px-6 md:px-10"
-        >
-          {/* background crowd — very subtle */}
+        {/* ══════════════════════════════════════════════════════════════
+             HERO — FULL BLEED CINEMATIC
+           ══════════════════════════════════════════════════════════════ */}
+        <section ref={heroRef} className="relative min-h-[100svh] overflow-hidden bg-black flex items-end">
+
+          {/* Full-bleed crossfading video */}
           <motion.div
-            className="absolute inset-0 -z-10"
-            style={reduceMotion ? undefined : { y: heroVideoY, scale: heroScale }}
+            className="absolute inset-0 z-0"
+            style={reduceMotion ? undefined : { y: heroVideoY }}
           >
-            <Image
-              src="/crowd-section.png"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-[0.07] grayscale"
-            />
-          </motion.div>
-
-          {/* left sidebar label */}
-          <motion.div
-            className="absolute left-5 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col items-center gap-4"
-          >
-            <span className="rotate-sidebar font-proxima text-[9px] uppercase tracking-[0.5em] text-white/25">
-              BOOMBAP · 2024 · VOL.01
-            </span>
-          </motion.div>
-
-          {/* main grid: [monitor | type] */}
-          <div className="relative z-10 mx-auto grid max-w-7xl min-h-[100svh] items-center
-            grid-cols-1 gap-8
-            md:grid-cols-[1fr_auto] md:gap-0">
-
-            {/* ── MONITOR (left) ── */}
-            <motion.div
-              style={reduceMotion ? undefined : { y: heroVideoY }}
-              className="relative flex flex-col justify-center py-24 md:py-0"
-            >
-              {/* monitor frame — wipe reveal from bottom */}
-              <motion.div
-                initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
-                animate={true ? { clipPath: "inset(0% 0% 0% 0%)" } : {}}
-                transition={{ duration: 1.3, delay: 0.1, ease: [0.76, 0, 0.24, 1] }}
-                className="bracket relative w-full max-w-[min(380px,80vw)] mx-auto md:mx-0 aspect-[9/16] overflow-hidden border border-white/14 bg-black shadow-[0_0_120px_rgba(160,239,70,0.06)]"
+            {HERO_VIDEOS.map((src, i) => (
+              <div
+                key={src}
+                className="absolute inset-0 transition-opacity duration-[1800ms] ease-in-out"
+                style={{ opacity: activeVideo === i ? 1 : 0 }}
               >
                 <iframe
-                  src={recapVideo}
-                  className="absolute left-1/2 top-1/2 h-[125vh] w-[125vw] -translate-x-1/2 -translate-y-1/2"
+                  src={src}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ width: "177.78vh", minWidth: "100%", height: "100%", minHeight: "56.25vw" }}
                   allow="autoplay"
-                  allowFullScreen
                 />
-                {/* cinematic grade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+              </div>
+            ))}
+            {/* Scanlines layer */}
+            <div className="scanlines absolute inset-0 z-10 pointer-events-none opacity-40" />
+          </motion.div>
 
-                {/* timecode overlay */}
-                <div className="absolute bottom-5 left-5 right-5 z-10 flex justify-between items-end">
-                  <div>
-                    <p className="font-proxima text-[8px] uppercase tracking-[0.35em] text-[#a0ef46]/70">Timecode</p>
-                    <p className="font-sarpanch text-lg font-black text-white/90 leading-none">00:00:00</p>
-                  </div>
-                  <p className="font-sarpanch text-xs font-black uppercase text-white/30">9:16</p>
-                </div>
+          {/* Cinematic grade — multi-layer */}
+          <motion.div
+            className="absolute inset-0 z-[2] pointer-events-none"
+            style={{
+              background: `
+                linear-gradient(to top, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.05) 60%, rgba(0,0,0,0.3) 100%),
+                linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.0) 45%)
+              `,
+            }}
+          />
 
-                {/* top-left tag */}
-                <div className="absolute top-5 left-5 z-10">
-                  <p className="font-proxima text-[8px] uppercase tracking-[0.35em] text-white/35">Featured Reel</p>
-                </div>
-              </motion.div>
+          {/* Left sidebar label */}
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col items-center gap-4">
+            <span className="v-text font-proxima text-[8px] uppercase tracking-[0.5em] text-white/20">
+              BOOMBAP · 2024 · VOL.01
+            </span>
+          </div>
 
-              {/* label below monitor */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={true ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8, delay: 1 }}
-                className="mt-6 flex items-center gap-6 max-w-[min(380px,80vw)] mx-auto md:mx-0"
-              >
-                <div className="h-px flex-1 bg-white/10" />
-                <p className="font-proxima text-[9px] uppercase tracking-[0.4em] text-white/30">
-                  BOOMBAP Archive
-                </p>
-              </motion.div>
+          {/* Main bottom content */}
+          <motion.div
+            className="relative z-10 w-full px-8 md:px-14 pb-16 md:pb-20"
+            style={reduceMotion ? undefined : { y: heroContentY }}
+          >
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center gap-4 mb-5"
+            >
+              <span className="h-px w-8 bg-[#a0ef46]" />
+              <span className="font-proxima text-[9px] uppercase tracking-[0.5em] text-[#a0ef46]">
+                Vol.01 Archive
+              </span>
             </motion.div>
 
-            {/* ── GIANT TYPE (right) ── */}
-            <div className="relative flex flex-col items-start md:items-end md:pl-10 pb-16 md:pb-0">
-
-              {/* "VOL" — character reveal */}
-              <motion.div
-                style={reduceMotion ? undefined : { y: heroVolY }}
-                className="relative overflow-hidden"
-              >
-                <SplitReveal
-                  text="VOL"
-                  inView={heroTextInView}
-                  delay={0.2}
-                  stagger={0.06}
-                  className="split-vol font-sarpanch font-black uppercase text-white leading-[0.82] select-none"
-                />
-                <style>{`.split-vol { font-size: clamp(5rem, 15vw, 12.5rem); }`}</style>
-                {/* inline style workaround */}
-                <span
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ fontSize: "clamp(5rem, 15vw, 12.5rem)" }}
-                  aria-hidden
-                />
-              </motion.div>
-
-              {/* horizontal divider — wipe */}
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={true ? { scaleX: 1 } : {}}
-                transition={{ duration: 1, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                style={{ transformOrigin: "right" }}
-                className="my-3 md:my-4 h-px w-full bg-white/12 origin-right"
+            {/* VOL 01 — TrueFocus animated headline */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="mb-6"
+            >
+              <TrueFocus
+                sentence="VOL 01"
+                manualMode={false}
+                blurAmount={4}
+                borderColor="#a0ef46"
+                glowColor="rgba(160,239,70,0.5)"
+                animationDuration={0.6}
+                pauseBetweenAnimations={1.2}
+                className="!justify-start gap-4 md:gap-8"
+                wordClassNames={[
+                  "font-sarpanch font-black uppercase text-white leading-[0.82]",
+                  "font-sarpanch font-black uppercase text-white leading-[0.82]",
+                ]}
+                activeWordClassName="font-sarpanch font-black uppercase text-secondary leading-[0.82]"
+                style={{ fontSize: "clamp(5.5rem, 16vw, 15rem)" }}
               />
+            </motion.div>
 
-              {/* "01" — clip-path from bottom */}
-              <motion.div
-                style={reduceMotion ? undefined : { y: heroNumY }}
-                className="overflow-hidden"
+            {/* Divider */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 1.1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{ transformOrigin: "left" }}
+              className="h-px w-full bg-white/10 mb-8"
+            />
+
+            {/* Desc + CTAs */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.85 }}
+                className="font-proxima text-base md:text-lg text-white/45 leading-relaxed max-w-sm"
               >
-                <motion.span
-                  initial={{ y: "100%" }}
-                  animate={true ? { y: "0%" } : {}}
-                  transition={{ duration: 1.1, delay: 0.3, ease: [0.76, 0, 0.24, 1] }}
-                  className="font-sarpanch font-black uppercase leading-[0.78] select-none block text-[#a0ef46]"
-                  style={{ fontSize: "clamp(7rem, 20vw, 18rem)" }}
-                >
-                  01
-                </motion.span>
-              </motion.div>
+                Reel-sized fragments from the first BOOMBAP night — staged so every scroll feels like stepping deeper into the room.
+              </motion.p>
 
-              {/* "RECAP" small beneath — word reveal */}
-              <div className="mt-4 md:mt-6">
-                <div className="overflow-hidden mb-3">
-                  <motion.span
-                    initial={{ y: "110%" }}
-                    animate={true ? { y: "0%" } : {}}
-                    transition={{ duration: 0.7, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-proxima text-[10px] uppercase tracking-[0.55em] text-white/35 block"
-                  >
-                    Phone First Recap
-                  </motion.span>
-                </div>
-                <motion.p
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={true ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.8, delay: 1.0 }}
-                  className="font-proxima text-base text-white/55 leading-relaxed max-w-[22rem]"
-                >
-                  Reel-sized fragments from the first BOOMBAP night — staged so
-                  every scroll feels like stepping deeper into the room.
-                </motion.p>
-              </div>
-
-              {/* CTAs — staggered slide-up */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
-                animate={true ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.7, delay: 1.1 }}
-                className="mt-8 flex gap-4"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 1.0 }}
+                className="flex gap-4 shrink-0"
               >
                 <a href="#vol1-reels" className="boombap-button">
                   <ScrambleText text="Enter Recap" />
@@ -555,150 +509,192 @@ export default function Vol1RecapExperience() {
                 </Link>
               </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* scroll cue */}
+          {/* Scroll cue */}
           <motion.div
             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
           >
-            <motion.div
-              animate={{ y: [0, 9, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="w-px h-10 bg-gradient-to-b from-[#a0ef46] to-transparent"
-            />
+            <div style={{ animation: "scrollY 1.8s ease-in-out infinite" }} className="w-px h-10 bg-gradient-to-b from-[#a0ef46] to-transparent" />
             <span className="font-proxima text-[8px] uppercase tracking-[0.5em] text-white/20">Scroll</span>
           </motion.div>
+
+          {/* Lime bottom bar — sweeps in */}
+          <motion.div
+            className="absolute bottom-0 left-0 h-[2px] w-full bg-[#a0ef46] z-30"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1.4, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: "left" }}
+          />
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════════
-             STATS TICKER
-           ══════════════════════════════════════════════════════════════════ */}
-        <div className="relative overflow-hidden border-y border-white/8 bg-black py-4">
+        {/* ══════════════════════════════════════════════════════════════
+             TICKER 1
+           ══════════════════════════════════════════════════════════════ */}
+        <div className="relative overflow-hidden border-y border-white/6 bg-black py-4">
           <div className="ticker-inner flex whitespace-nowrap w-max">
             {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
               <span key={i} className="inline-flex items-center gap-6 px-8">
-                <span className="font-sarpanch text-sm font-black uppercase tracking-[0.15em] text-white/80">
-                  {item}
-                </span>
-                <span className="h-1 w-1 rounded-full bg-[#a0ef46]" />
+                <span className="font-sarpanch text-sm font-black uppercase tracking-[0.15em] text-white/60">{item}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#a0ef46]" />
               </span>
             ))}
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════════════════════════
+        {/* ══════════════════════════════════════════════════════════════
+             STATS ROW
+           ══════════════════════════════════════════════════════════════ */}
+        <section ref={statsRef} className="relative bg-black border-b border-white/6 px-8 md:px-14 py-20 md:py-28 overflow-hidden">
+          {/* giant BG text */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" aria-hidden>
+            <span className="font-sarpanch font-black text-white/[0.025] leading-none" style={{ fontSize: "clamp(8rem, 30vw, 26rem)" }}>
+              BBX
+            </span>
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-6xl">
+            <div className="grid grid-cols-3 gap-8 md:gap-16">
+              {STATS.map((s, i) => <StatBlock key={s.label} stat={s} index={i} />)}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════
              REEL STAIRCASE
-           ══════════════════════════════════════════════════════════════════ */}
-        <section
-          id="vol1-reels"
-          className="relative overflow-visible bg-black px-6 pt-20 pb-48 md:px-10 md:pt-28"
-        >
+           ══════════════════════════════════════════════════════════════ */}
+        <section id="vol1-reels" className="relative overflow-visible bg-black px-8 md:px-14 pt-20 pb-52 md:pt-28">
           <div className="mx-auto max-w-7xl">
 
-            {/* section label — split text reveal */}
-            <div className="mb-16 flex items-end justify-between">
-              <div>
-                <div className="overflow-hidden mb-3">
-                  <ReelSectionLabel />
+            {/* Section header */}
+            <div ref={reelsHeadRef} className="mb-20 md:mb-24">
+              <div className="flex items-end gap-8 mb-6">
+                <div className="overflow-hidden">
+                  <motion.span
+                    initial={{ y: "110%" }}
+                    animate={reelsHeadInView ? { y: "0%" } : {}}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                    className="block font-proxima text-[9px] uppercase tracking-[0.5em] text-[#a0ef46]"
+                  >
+                    Vol.01 Signal Wall
+                  </motion.span>
                 </div>
-                <ReelSectionHeading />
               </div>
-              <span className="font-sarpanch font-black text-white/8 leading-none hidden md:block"
-                style={{ fontSize: "clamp(4rem, 12vw, 10rem)" }}>
-                03
-              </span>
+              <div className="flex items-end justify-between">
+                <div>
+                  {["Tall clips.", "Heavy memory."].map((line, i) => (
+                    <div key={line} className="overflow-hidden">
+                      <motion.span
+                        initial={{ y: "110%" }}
+                        animate={reelsHeadInView ? { y: "0%" } : {}}
+                        transition={{ duration: 1, delay: 0.1 + i * 0.12, ease: [0.76, 0, 0.24, 1] }}
+                        className="block font-sarpanch font-black uppercase leading-[0.85] text-white"
+                        style={{ fontSize: "clamp(2.4rem, 8vw, 7rem)" }}
+                      >
+                        {line}
+                      </motion.span>
+                    </div>
+                  ))}
+                </div>
+                <span className="font-sarpanch font-black text-white/[0.06] leading-none hidden md:block select-none" style={{ fontSize: "clamp(4rem, 12vw, 11rem)" }}>
+                  03
+                </span>
+              </div>
             </div>
 
-            {/* staircase grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto relative">
+            {/* Staircase grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 max-w-5xl mx-auto relative">
               {reelClips.map((clip, i) => (
-                <ReelCard
-                  key={clip.stat}
-                  clip={clip}
-                  index={i}
-                  reduceMotion={reduceMotion}
-                />
+                <div key={clip.stat} className={`stair-${i}`}>
+                  <ReelCard clip={clip} index={i} />
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════════
-             REVERSE TICKER (Obys uses dual tickers)
-           ══════════════════════════════════════════════════════════════════ */}
-        <div className="relative overflow-hidden border-y border-white/8 bg-[#a0ef46] py-3">
+        {/* ══════════════════════════════════════════════════════════════
+             GREEN TICKER
+           ══════════════════════════════════════════════════════════════ */}
+        <div className="relative overflow-hidden border-y border-black/20 bg-[#a0ef46] py-3">
           <div className="ticker-inner-rev flex whitespace-nowrap w-max">
             {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
               <span key={i} className="inline-flex items-center gap-6 px-8">
-                <span className="font-sarpanch text-sm font-black uppercase tracking-[0.15em] text-black">
-                  {item}
-                </span>
-                <span className="h-1 w-1 rounded-full bg-black/40" />
+                <span className="font-sarpanch text-sm font-black uppercase tracking-[0.15em] text-black">{item}</span>
+                <span className="h-1 w-1 rounded-full bg-black/30" />
               </span>
             ))}
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════════════════════════
+        {/* ══════════════════════════════════════════════════════════════
              EDITORIAL STATEMENT
-           ══════════════════════════════════════════════════════════════════ */}
+           ══════════════════════════════════════════════════════════════ */}
         <section
-          ref={statementRef}
-          className="relative overflow-hidden bg-black border-t border-white/8 px-6 py-24 md:px-10 md:py-36"
+          ref={statRef}
+          className="relative overflow-hidden bg-black border-t border-white/6 px-8 md:px-14 py-28 md:py-44"
         >
-          {/* huge background "01" */}
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-            aria-hidden
-          >
-            <span
-              className="font-sarpanch font-black text-white opacity-[0.025] leading-none"
-              style={{ fontSize: "clamp(10rem, 40vw, 36rem)" }}
-            >
+          {/* Giant ghost 01 */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" aria-hidden>
+            <span className="font-sarpanch font-black text-white opacity-[0.022] leading-none" style={{ fontSize: "clamp(10rem, 45vw, 40rem)" }}>
               01
             </span>
           </div>
 
-          <div className="relative z-10 mx-auto max-w-6xl">
-            {["THE ROOM", "REMEMBERED", "EVERYTHING"].map((word, i) => {
-              const colors = ["text-white/90", "text-[#a0ef46]", "text-white/18"];
-              return (
-                <div key={word} className="overflow-hidden">
-                  <motion.span
-                    initial={{ y: "110%", opacity: 0 }}
-                    animate={statementInView ? { y: "0%", opacity: 1 } : {}}
-                    transition={{ duration: 1.2, delay: i * 0.18, ease: [0.76, 0, 0.24, 1] }}
-                    className={`block font-sarpanch font-black uppercase leading-[0.82] ${colors[i]}`}
-                    style={{ fontSize: "clamp(1.8rem, 7.5vw, 8rem)" }}
-                  >
-                    {word}
-                  </motion.span>
-                </div>
-              );
-            })}
+          {/* Horizontal lime line — left edge */}
+          <motion.div
+            initial={{ scaleY: 0 }}
+            animate={statInView ? { scaleY: 1 } : {}}
+            transition={{ duration: 1.4, ease: [0.76, 0, 0.24, 1] }}
+            style={{ transformOrigin: "top" }}
+            className="absolute left-8 md:left-14 top-28 bottom-28 w-[1.5px] bg-[#a0ef46]/20"
+          />
+
+          <div className="relative z-10 mx-auto max-w-6xl pl-8">
+            {[
+              { text: "THE ROOM", color: "text-white/88" },
+              { text: "REMEMBERED", color: "text-[#a0ef46]" },
+              { text: "EVERYTHING", color: "text-white/15" },
+            ].map(({ text, color }, i) => (
+              <div key={text} className="overflow-hidden">
+                <motion.span
+                  initial={{ y: "110%", opacity: 0 }}
+                  animate={statInView ? { y: "0%", opacity: 1 } : {}}
+                  transition={{ duration: 1.2, delay: i * 0.16, ease: [0.76, 0, 0.24, 1] }}
+                  className={`block font-sarpanch font-black uppercase leading-[0.82] ${color}`}
+                  style={{ fontSize: "clamp(2rem, 8.5vw, 9rem)" }}
+                >
+                  {text}
+                </motion.span>
+              </div>
+            ))}
 
             <motion.div
               initial={{ scaleX: 0 }}
-              animate={statementInView ? { scaleX: 1 } : {}}
-              transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              animate={statInView ? { scaleX: 1 } : {}}
+              transition={{ duration: 1.2, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
               style={{ transformOrigin: "left" }}
-              className="mt-10 h-px w-full bg-white/10"
+              className="mt-12 h-px w-full bg-white/8"
             />
 
             <motion.p
               initial={{ opacity: 0, y: 10 }}
-              animate={statementInView ? { opacity: 1, y: 0 } : {}}
+              animate={statInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.9 }}
-              className="mt-7 font-proxima text-base text-white/38 max-w-sm"
+              className="mt-8 font-proxima text-base text-white/30 max-w-xs"
             >
               Vol.01 · BOOMBAP Archive · Phone First Format
             </motion.p>
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════════
-             CTA — DIAGONAL SPLIT
-           ══════════════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════════════════════════
+             CTA SPLIT
+           ══════════════════════════════════════════════════════════════ */}
         <CtaSection />
 
       </main>
@@ -707,46 +703,8 @@ export default function Vol1RecapExperience() {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/*  ISOLATED COMPONENTS (avoid hooks-in-loops ESLint issue)        */
+/*  CTA SECTION                                                     */
 /* ─────────────────────────────────────────────────────────────── */
-
-function ReelSectionLabel() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  return (
-    <motion.span
-      ref={ref}
-      initial={{ y: "110%" }}
-      animate={inView ? { y: "0%" } : {}}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="block font-proxima text-[9px] uppercase tracking-[0.5em] text-[#a0ef46]"
-    >
-      Vol.01 Reel Wall
-    </motion.span>
-  );
-}
-
-function ReelSectionHeading() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  return (
-    <div ref={ref}>
-      {["Tall clips.", "Heavy memory."].map((line, i) => (
-        <div key={line} className="overflow-hidden">
-          <motion.span
-            initial={{ y: "110%" }}
-            animate={inView ? { y: "0%" } : {}}
-            transition={{ duration: 1, delay: i * 0.12, ease: [0.76, 0, 0.24, 1] }}
-            className="block font-sarpanch font-black uppercase leading-[0.82] text-white"
-            style={{ fontSize: "clamp(2.2rem, 7.5vw, 6rem)" }}
-          >
-            {line}
-          </motion.span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function CtaSection() {
   const ref = useRef(null);

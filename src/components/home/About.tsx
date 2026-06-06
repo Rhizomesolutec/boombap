@@ -1,167 +1,177 @@
 import Image from "next/image";
-import MotionReveal from "../ui/MotionReveal";
+import type { CSSProperties } from "react";
 import ScrambleText from "../ui/ScrambleText";
+import MotionReveal from "../ui/MotionReveal";
 
-const culturePoints = [
-  "Floor-first event recaps",
-  "Artist and crew archive",
-  "Ticket drops and merch runs",
-  "Street-level music stories",
+const strips = [
+  { top: "7%", left: "18%", width: "64%", height: "16%", delay: "0s" },
+  { top: "29%", left: "4%", width: "86%", height: "13%", delay: "-1.7s" },
+  { top: "48%", left: "25%", width: "70%", height: "19%", delay: "-3.2s" },
+  { top: "74%", left: "10%", width: "58%", height: "12%", delay: "-4.4s" },
+];
+
+const rails = [
+  ["Floor", "Events and recaps"],
+  ["Archive", "Artists and crews"],
+  ["Radio", "Sets and cyphers"],
+  ["Drops", "Tickets and merch"],
 ];
 
 export default function AboutLanding() {
   return (
-    <>
-      <section id="culture" className="relative w-full bg-black overflow-hidden border-t border-white/5 py-24 md:py-28">
-        <div className="absolute top-24 md:top-28 left-1/2 -translate-x-1/2 z-0 opacity-5 kinetic-title text-watermark whitespace-nowrap">
-          ARCHIVE
-        </div>
+    <section id="culture" className="relative overflow-hidden border-t border-white/5 bg-black py-24 text-white md:py-32">
+      <style>{`
+        .about-map {
+          background:
+            linear-gradient(90deg, rgba(160,239,70,0.12) 1px, transparent 1px) 0 0 / 5.8rem 100%,
+            linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px) 0 0 / 100% 5.8rem;
+          mask-image: linear-gradient(90deg, transparent, black 20%, black 82%, transparent);
+        }
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <MotionReveal className="mb-12 grid gap-7 md:grid-cols-[0.82fr_1.18fr] md:items-start">
-            <div>
-              <span className="text-primary text-[10px] tracking-[0.4em] uppercase font-proxima mb-4 block">
-                About Boombap
-              </span>
-              <h2 className="text-white text-4xl sm:text-5xl md:text-6xl font-sarpanch font-black leading-tight tracking-tight">
-                UNDERGROUND<br />MOVEMENT
-              </h2>
-            </div>
-            <div className="grid gap-5 border-l border-primary/50 pl-5 md:pl-7">
-              <p className="text-white/66 text-lg md:text-xl font-proxima font-light max-w-2xl leading-relaxed">
-                Coming from Under A Devil Inside, BOOMBAP is a digital underground space built around rap culture, live energy, and community.
-              </p>
+        .about-slice {
+          clip-path: polygon(2.2rem 0, 100% 0, calc(100% - 2.2rem) 100%, 0 100%);
+          animation: aboutSliceFloat 8s ease-in-out infinite;
+          animation-delay: var(--slice-delay);
+        }
 
-              {/* Premium BOOMBAP Radio banner with live indicator and pattern overlay */}
-              <div className="relative flex flex-col gap-3 border border-primary/30 bg-primary/[0.03] backdrop-blur-xs px-5 py-4 md:flex-row md:items-center md:justify-between overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                  style={{
-                    backgroundImage: "repeating-linear-gradient(45deg, var(--color-primary) 0 1px, transparent 1px 10px)"
-                  }}
-                />
-                <div className="relative z-10 flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-                    </span>
-                    <span className="block font-sarpanch text-sm font-black uppercase tracking-[0.16em] text-primary">
-                      BOOMBAP Radio
-                    </span>
-                  </div>
-                  <p className="mt-1.5 font-proxima text-[10px] uppercase tracking-[0.18em] text-white/48">
-                    Live from the culture
-                  </p>
+        @keyframes aboutSliceFloat {
+          0%, 100% { transform: translate3d(0, 0, 0); }
+          50% { transform: translate3d(1.1rem, -0.5rem, 0); }
+        }
+
+        .about-frequency {
+          animation: aboutFrequency 22s linear infinite;
+        }
+
+        @keyframes aboutFrequency {
+          to { transform: rotate(360deg); }
+        }
+
+        .about-readout::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, rgba(160,239,70,0.18), transparent);
+          transform: translateX(-120%);
+          animation: aboutReadout 5s ease-in-out infinite;
+        }
+
+        @keyframes aboutReadout {
+          0%, 45% { transform: translateX(-120%); }
+          75%, 100% { transform: translateX(120%); }
+        }
+      `}</style>
+      
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6">
+        <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <MotionReveal>
+            <span className="mb-5 block font-proxima text-[10px] font-bold uppercase tracking-[0.42em] text-primary">
+              About Boombap
+            </span>
+
+            <h2 className="max-w-xl font-sarpanch text-[clamp(2.2rem,4.8vw,5rem)] font-black uppercase leading-[0.94] text-white">
+              A signal for the underground.
+            </h2>
+
+            <p className="mt-7 max-w-lg font-proxima text-base font-light leading-relaxed text-white/62 md:text-lg">
+              Coming from Under A Devil Inside, BOOMBAP documents the rap culture, live energy, and community already moving through the city.
+            </p>
+
+            <div className="about-readout relative mt-8 max-w-lg overflow-hidden border-l border-primary/35 bg-black/72 px-5 py-5 backdrop-blur-md">
+              <div className="relative z-10 flex gap-5">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/10 bg-white/[0.03]">
+                  <Image
+                    src="/DIR-logo.png"
+                    alt="Devil Inside Records"
+                    width={46}
+                    height={46}
+                    className="h-11 w-11 object-contain opacity-85"
+                  />
                 </div>
-                <p className="relative z-10 font-proxima text-[10px] uppercase tracking-[0.18em] text-white/62 border-t border-white/5 pt-2 md:border-t-0 md:pt-0">
-                  Podcasts // Live Sets // Cyphers
-                </p>
-              </div>
 
-              {/* Enhanced Interactive Culture Points */}
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                {culturePoints.map((item, idx) => (
-                  <div
-                    key={item}
-                    className="group/item border border-white/10 bg-white/[0.02] backdrop-blur-xs p-4 transition-all duration-300 hover:border-primary/40 hover:bg-primary/[0.02]"
+                <div>
+                  <span className="font-proxima text-[8px] font-bold uppercase tracking-[0.34em] text-primary">
+                    Manifest
+                  </span>
+                  <p className="mt-3 font-sarpanch text-xl font-black uppercase leading-[0.96] text-white md:text-2xl">
+                    We are showing what already exists here.
+                  </p>
+                  <a
+                    href="https://devilinsiderecords.in/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex font-sarpanch text-[10px] font-black uppercase tracking-[0.18em] text-primary transition-colors hover:text-white"
                   >
-                    <span className="mb-3 block font-sarpanch text-xs text-primary/80 transition-colors group-hover/item:text-primary">
-                      // {String(idx + 1).padStart(2, "0")}
-                    </span>
-                    <p className="font-proxima text-[10px] uppercase tracking-[0.18em] leading-relaxed text-white/58 group-hover/item:text-white transition-colors">
-                      {item}
+                    <ScrambleText text="Visit DIR" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 max-w-lg border-y border-white/10">
+              {rails.map(([title, value], index) => (
+                <div key={title} className="grid grid-cols-[3.2rem_1fr] items-center border-b border-white/10 py-4 last:border-b-0">
+                  <span className="font-sarpanch text-xs font-black text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="grid gap-1 sm:grid-cols-[0.62fr_1fr] sm:items-center">
+                    <h3 className="font-sarpanch text-base font-black uppercase text-white">{title}</h3>
+                    <p className="font-proxima text-[10px] font-bold uppercase tracking-[0.22em] text-white/42">
+                      {value}
                     </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </MotionReveal>
 
-          {/* Equal height bottom card grid using items-stretch and ticker-hover symmetry */}
-          <div className="w-full">
-            <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  {
-                    img: "/boombap-event.jpg",
-                    tag: "LIVE ENERGY",
-                    title: "Events, Tickets, Recaps",
-                    copy: "Explore upcoming nights, buy tickets, and watch VOL.01 moments pulled from the floor."
-                  },
-                  {
-                    img: "/crowd-section.png",
-                    tag: "PEOPLE",
-                    title: "Artists, Culture, Community",
-                    copy: "Discover the voices, crews, faces, and street-level movement around the sound."
-                  }
-                ].map((item, idx) => (
-                  <MotionReveal
-                    key={item.title}
-                    className="ticker-hover group relative overflow-hidden aspect-4/5 border border-white/10 bg-white/5"
-                    transition={{ delay: idx * 0.12 }}
-                  >
-                    <Image
-                      src={item.img}
-                      alt={item.title}
-                      fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/45 to-transparent" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-7">
-                      <span className="text-primary text-[8px] tracking-[0.3em] uppercase font-proxima mb-3">{item.tag}</span>
-                      <h3 className="text-white text-2xl font-sarpanch font-bold leading-tight mb-3">{item.title}</h3>
-                      <p className="text-white/58 text-sm leading-relaxed font-proxima">{item.copy}</p>
-                    </div>
-                  </MotionReveal>
-                ))}
+          <MotionReveal delay={0.12} className="relative min-h-[31rem] md:min-h-[40rem]">
+            <div className="absolute left-1/2 top-1/2 h-[min(72vw,31rem)] w-[min(72vw,31rem)] -translate-x-1/2 -translate-y-1/2">
+              <div className="about-frequency absolute inset-0 border border-dashed border-primary/35" />
+              <div className="absolute inset-8 border border-white/10" />
+              <div className="absolute inset-16 border border-secondary/35" />
+
+              <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-black px-3 font-proxima text-[8px] font-bold uppercase tracking-[0.28em] text-primary">
+                Live culture
               </div>
-
-              {/* Refactored Devil Inside Records Card to match left column height, add hover animation and improve watermark */}
-              <MotionReveal delay={0.24} className="h-full">
-                <div className="ticker-hover group relative flex h-full flex-col justify-between overflow-hidden border border-primary/25 bg-white/2.5 p-7 md:p-8">
-                  {/* Transformed watermark to scale slightly on group hover and bleed out organically at the bottom-right corner */}
-                  <span className="pointer-events-none absolute -right-6 -bottom-10 md:-right-8 md:-bottom-12 font-sarpanch text-[10rem] md:text-[13rem] font-black leading-none text-white/[0.025] select-none transition-transform duration-700 group-hover:scale-105">
-                    DIR
-                  </span>
-
-                  <div className="absolute right-7 top-7 hidden h-24 w-24 items-center justify-center border border-white/10 bg-black/45 md:flex transition-colors group-hover:border-primary/30">
-                    <Image
-                      src="/DIR-logo.png"
-                      alt=""
-                      width={72}
-                      height={72}
-                      className="h-16 w-16 object-contain opacity-80"
-                    />
-                  </div>
-                  <div className="relative z-10 flex h-full flex-col justify-between">
-                    <div>
-                      <span className="text-primary text-[10px] tracking-[0.35em] uppercase font-proxima mb-5 block">
-                        Devil Inside Records
-                      </span>
-                      <h3 className="text-white text-3xl md:text-4xl font-sarpanch font-black leading-tight mb-5">
-                        INDEPENDENT.<br />ANTI-ESTABLISHMENT.
-                      </h3>
-                      <p className="text-white/66 text-lg font-proxima font-light leading-relaxed mb-6">
-                        Devil Inside Records is an independent record label dedicated to the rawest corners of underground rap and hip-hop. It backs uncompromising artists, gritty cinematic sound, and real stories without chasing polished mainstream rules.
-                      </p>
-                    </div>
-                    <a
-                      href="https://devil-inside-records.vercel.app/"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="boombap-button boombap-button--ghost w-fit mt-auto"
-                    >
-                      <ScrambleText text="Visit Label" />
-                    </a>
-                  </div>
-                </div>
-              </MotionReveal>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-black px-3 font-proxima text-[8px] font-bold uppercase tracking-[0.28em] text-white/38">
+                Chennai frequency
+              </div>
             </div>
-          </div>
+
+            <div className="absolute inset-0">
+              {strips.map((strip, index) => (
+                <div
+                  key={index}
+                  className="about-slice absolute overflow-hidden border border-white/10 bg-white/[0.025]"
+                  style={{
+                    top: strip.top,
+                    left: strip.left,
+                    width: strip.width,
+                    height: strip.height,
+                    "--slice-delay": strip.delay,
+                  } as CSSProperties & { "--slice-delay": string }}
+                >
+                  <Image
+                    src={index % 2 === 0 ? "/boombap-event.jpg" : "/crowd-section.png"}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 48vw, 100vw"
+                    className="object-cover opacity-80 saturate-110"
+                    style={{
+                      objectPosition: index % 2 === 0 ? "center 46%" : "center 54%",
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-linear-to-r from-black/62 via-transparent to-black/30" />
+                </div>
+              ))}
+            </div>
+
+          </MotionReveal>
         </div>
-      </section>
-    </>
-  )
+      </div>
+    </section>
+  );
 }
