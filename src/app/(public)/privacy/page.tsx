@@ -3,7 +3,7 @@ import PrivacyContent from "./PrivacyContent";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | BOOMBAP",
-  description: "Read the privacy policy of BOOMBAP (organized by Devil Inside Records) regarding how we collect, use, and protect your personal information.",
+  description: "Read the privacy policy of BOOMBAP regarding how we collect, use, and protect your personal information.",
 };
 
 export default function PrivacyPage() {

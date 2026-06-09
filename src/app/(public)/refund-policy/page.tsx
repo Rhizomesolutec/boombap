@@ -3,7 +3,7 @@ import RefundPolicyContent from "./RefundPolicyContent";
 
 export const metadata: Metadata = {
   title: "Cancellation & Refund Policy | BOOMBAP",
-  description: "Read the Cancellation and Refund Policy of BOOMBAP (organized by Devil Inside Records) regarding tickets and event cancellations.",
+  description: "Read the Cancellation and Refund Policy of BOOMBAP regarding tickets and event cancellations.",
 };
 
 export default function RefundPolicyPage() {

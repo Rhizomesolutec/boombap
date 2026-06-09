@@ -131,8 +131,8 @@ export default function ContactSection() {
                   Hotlines
                 </span>
                 <div className="mt-3 flex flex-col gap-2 font-sarpanch text-base font-bold text-white">
-                  <a href="mailto:info@devilinsiderecords.in" className="transition-colors hover:text-primary">
-                    info@devilinsiderecords.in
+                  <a href="mailto:[EMAIL_ADDRESS]" className="transition-colors hover:text-primary">
+                    [EMAIL_ADDRESS]
                   </a>
                 </div>
               </div>

@@ -499,12 +499,12 @@ export default function Vol1RecapExperience() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 1.0 }}
-                className="flex gap-4 shrink-0"
+                className="flex flex-wrap gap-3 shrink-0"
               >
-                <a href="#vol1-reels" className="boombap-button">
+                <a href="#vol1-reels" className="boombap-button w-full sm:w-auto">
                   <ScrambleText text="Enter Recap" />
                 </a>
-                <Link href="/tickets" className="boombap-button boombap-button--ghost">
+                <Link href="/tickets" className="boombap-button boombap-button--ghost w-full sm:w-auto">
                   <ScrambleText text="Vol.02 Tickets" />
                 </Link>
               </motion.div>

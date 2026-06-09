@@ -217,7 +217,7 @@ function buildConfirmationHtml(args: SendConfirmationEmailArgs, logoUrl: string)
               style="background-color:#0d0d0d;background-image:linear-gradient(#0d0d0d,#0d0d0d);padding:16px 32px;border-top:1px solid #1a1a1a;">
             <span style="font-family:${font};font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#444444;">
               Bring a valid ID to the venue &nbsp;&middot;&nbsp;
-              <a href="mailto:info@devilinsiderecords.in" style="color:#555555;text-decoration:none;">info@devilinsiderecords.in</a>
+              <a href="mailto:[EMAIL_ADDRESS]" style="color:#555555;text-decoration:none;">[EMAIL_ADDRESS]</a>
             </span>
           </td>
         </tr>
