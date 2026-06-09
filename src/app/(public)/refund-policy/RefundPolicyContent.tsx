@@ -115,7 +115,7 @@ export default function RefundPolicyContent() {
                   Event Cancellations
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
-                  If an event is cancelled by the organizers (BOOMBAP / Devil Inside Records), a full refund will be automatically issued to all ticket holders through our payment processor.
+                  If an event is cancelled by the organizers (BOOMBAP), a full refund will be automatically issued to all ticket holders through our payment processor.
                 </p>
               </MotionReveal>
 
@@ -126,8 +126,8 @@ export default function RefundPolicyContent() {
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
                   For any questions or support regarding ticket cancellations, transactions, or refund requests, please contact our support team at{" "}
-                  <a href="mailto:info@devilinsiderecords.in" className="text-primary font-bold hover:underline transition-all">
-                    info@devilinsiderecords.in
+                  <a href="mailto:[EMAIL_ADDRESS]" className="text-primary font-bold hover:underline transition-all">
+                    [EMAIL_ADDRESS]
                   </a>
                   .
                 </p>

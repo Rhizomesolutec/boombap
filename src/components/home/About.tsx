@@ -76,10 +76,10 @@ export default function AboutLanding() {
             </h2>
 
             <p className="mt-7 max-w-lg font-proxima text-base font-light leading-relaxed text-white/62 md:text-lg">
-              Coming from Under A Devil Inside, BOOMBAP documents the rap culture, live energy, and community already moving through the city.
+              BOOMBAP documents the rap culture, live energy, and community already moving through the city.
             </p>
 
-            <div className="about-readout relative mt-8 max-w-lg overflow-hidden border-l border-primary/35 bg-black/72 px-5 py-5 backdrop-blur-md">
+            {/* <div className="about-readout relative mt-8 max-w-lg overflow-hidden border-l border-primary/35 bg-black/72 px-5 py-5 backdrop-blur-md">
               <div className="relative z-10 flex gap-5">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/10 bg-white/[0.03]">
                   <Image
@@ -108,7 +108,7 @@ export default function AboutLanding() {
                   </a>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-10 max-w-lg border-y border-white/10">
               {rails.map(([title, value], index) => (

@@ -85,7 +85,7 @@ export default function PrivacyContent() {
                   Introduction
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
-                  This Privacy Policy describes how <strong>BOOMBAP (organized by Devil Inside Records)</strong> collects, uses, and protects your personal information when you use our website, buy event tickets, and interact with our services.
+                  This Privacy Policy describes how <strong>BOOMBAP</strong> collects, uses, and protects your personal information when you use our website, buy event tickets, and interact with our services.
                 </p>
               </MotionReveal>
 
@@ -146,8 +146,8 @@ export default function PrivacyContent() {
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
                   If you have any questions about this Privacy Policy, please reach out to us at{" "}
-                  <a href="mailto:info@devilinsiderecords.in" className="text-primary font-bold hover:underline transition-all">
-                    info@devilinsiderecords.in
+                  <a href="mailto:[EMAIL_ADDRESS]" className="text-primary font-bold hover:underline transition-all">
+                    [EMAIL_ADDRESS]
                   </a>
                   .
                 </p>

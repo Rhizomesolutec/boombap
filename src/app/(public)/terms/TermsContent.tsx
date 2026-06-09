@@ -85,7 +85,7 @@ export default function TermsContent() {
                   Introduction
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
-                  Welcome to <strong>BOOMBAP (organized by Devil Inside Records)</strong>. These terms and conditions outline the rules and regulations for the use of our website, services, ticket bookings, and attendance at our live shows.
+                  Welcome to <strong>BOOMBAP</strong>. These terms and conditions outline the rules and regulations for the use of our website, services, ticket bookings, and attendance at our live shows.
                 </p>
               </MotionReveal>
 
@@ -105,7 +105,7 @@ export default function TermsContent() {
                   Intellectual Property Rights
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
-                  Other than the content you own, under these terms, BOOMBAP / Devil Inside Records and/or its licensors own all the intellectual property rights and materials contained in this website, including designs, text, audio recordings, video assets, and branding materials.
+                  Other than the content you own, under these terms, BOOMBAP and/or its licensors own all the intellectual property rights and materials contained in this website, including designs, text, audio recordings, video assets, and branding materials.
                 </p>
               </MotionReveal>
 
@@ -125,7 +125,7 @@ export default function TermsContent() {
                   Limitation of Liability
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
-                  In no event shall BOOMBAP / Devil Inside Records, nor any of its officers, directors, and employees, be held liable for anything arising out of or in any way connected with your use of this website or attendance at events.
+                  In no event shall BOOMBAP, nor any of its officers, directors, and employees, be held liable for anything arising out of or in any way connected with your use of this website or attendance at events.
                 </p>
               </MotionReveal>
 
@@ -156,8 +156,8 @@ export default function TermsContent() {
                 </h2>
                 <p className="mt-4 font-proxima text-sm leading-relaxed text-white/60">
                   If you have any questions or queries regarding these Terms and Conditions, feel free to reach out to us at{" "}
-                  <a href="mailto:info@devilinsiderecords.in" className="text-primary font-bold hover:underline transition-all">
-                    info@devilinsiderecords.in
+                  <a href="mailto:[EMAIL_ADDRESS]" className="text-primary font-bold hover:underline transition-all">
+                    [EMAIL_ADDRESS]
                   </a>
                   .
                 </p>
