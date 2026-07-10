@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sarpanch, Montserrat, Creepster } from "next/font/google";
+import { Sarpanch, Montserrat } from "next/font/google";
 import "./globals.css";
 
 const sarpanch = Sarpanch({
@@ -14,11 +14,6 @@ const montserrat = Montserrat({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const creepster = Creepster({
-  weight: "400",
-  variable: "--font-creepster",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "BOOMBAP",
@@ -33,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sarpanch.variable} ${montserrat.variable} ${creepster.variable} h-full antialiased`}
+      className={`${sarpanch.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black text-white relative font-proxima">
         {children}
