@@ -356,11 +356,7 @@ export default function TicketsPage() {
           );
         }
         
-        // Always include the hardcoded SAB6 SHOW ₹66 ticket, and merge any other SAB6 tiers from DB
-        const list = [
-          FALLBACK_TIER as any,
-          ...dbList.filter((t: TicketTier) => t.id !== 'sab6-show')
-        ];
+        const list = dbList.length > 0 ? dbList : [FALLBACK_TIER as any];
 
         setTiers(list);
         setSelectedTierId(list[0].id);

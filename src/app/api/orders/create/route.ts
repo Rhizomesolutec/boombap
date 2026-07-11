@@ -43,6 +43,14 @@ export async function POST(req: NextRequest) {
 
     if (dbTier && !tierError) {
       tier = dbTier;
+    } else if (ticket_tier === 'sab6-test') {
+      // Fallback: hardcoded test tier if not yet in DB
+      tier = {
+        price: 100, // ₹1
+        available: true,
+        quantity_limit: 100,
+        max_per_order: 4
+      }
     } else if (ticket_tier === 'sab6-show' || ticket_tier === 'early-vip') {
       // Fallback: hardcoded tiers if not yet in DB
       tier = {

@@ -1,10 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/src/lib/supabase'
 
+async function ensureDefaultSAB6Tiers(supabase: any) {
+  try {
+    const defaultTiers = [
+      {
+        id: 'sab6-test',
+        name: 'SAB6 TEST',
+        price: 100, // ₹1
+        description: 'Test ticket for payment and email verification.',
+        perks: ['Test Access', 'Payment Verification'],
+        available: true,
+        quantity_limit: 100,
+        sort_order: 0,
+        max_per_order: 4
+      },
+      {
+        id: 'sab6-show',
+        name: 'SAB6 SHOW',
+        price: 6600, // ₹66
+        description: 'Get in early for an exclusive experience.',
+        perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
+        available: true,
+        quantity_limit: 100,
+        sort_order: 1,
+        max_per_order: 4
+      }
+    ];
+
+    for (const t of defaultTiers) {
+      const { data } = await supabase
+        .from('ticket_tiers')
+        .select('id')
+        .eq('id', t.id)
+        .maybeSingle();
+
+      if (!data) {
+        await supabase
+          .from('ticket_tiers')
+          .insert(t);
+        console.log(`[seeding] Inserted default tier: ${t.id}`);
+      }
+    }
+  } catch (err) {
+    console.error('[seeding] Failed to seed default SAB6 tiers:', err);
+  }
+}
+
 // ─── GET /api/tickets/stats ───
 export async function GET(_req: NextRequest) {
   try {
     const supabase = createServerSupabaseClient()
+    await ensureDefaultSAB6Tiers(supabase)
 
     // Fetch all tiers
     const { data: tiers, error: tiersError } = await supabase
