@@ -84,7 +84,7 @@ export default function Header() {
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-6 md:h-28 md:px-16">
           <Link href="/" className="relative z-50 flex items-center justify-center group">
             <Image
-              src={pathname === "/tickets" ? "/SAB6/Boombap.jpg" : "/bmbp-green-logo.png"}
+              src={pathname === "/tickets" ? "/SAB6/Show Name.jpg" : "/bmbp-green-logo.png"}
               alt="BOOMBAP Logo"
               width={128}
               height={128}
