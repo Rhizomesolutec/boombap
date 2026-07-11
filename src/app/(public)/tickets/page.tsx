@@ -494,7 +494,7 @@ export default function TicketsPage() {
             className="mt-8 max-w-2xl border-l border-primary/70 pl-5 md:pl-7"
           >
             <p className="text-xl leading-relaxed text-white/70 md:text-2xl" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
-              The first listen belongs to the real ones.<br />Step into the world of SAB6 befo6 anyone else. Limited entries. One night that won’t happen twice.
+              the first listen belongs to the real ones.<br />step into the world of sab6 befo6 anyone else. limited entries. one night that won’t happen twice.
             </p>
           </MotionReveal>
 
@@ -588,9 +588,6 @@ export default function TicketsPage() {
               />
             </div>
 
-            <p className="text-base leading-relaxed text-white/60 max-w-lg mt-2" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
-              Enter The SAB6 Era
-            </p>
 
             {/* CTA & Social Channels */}
             <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-8 w-full">

@@ -110,9 +110,7 @@ export default function Home() {
                 />
               </div>
 
-              <p className="text-base leading-relaxed text-white/60 max-w-lg mt-2" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
-                Enter The SAB6 Era
-              </p>
+
 
               {/* CTA & Social Channels */}
               <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-8 w-full">
