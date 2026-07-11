@@ -111,7 +111,7 @@ export default function Home() {
               </div>
 
               <p className="text-base leading-relaxed text-white/60 max-w-lg mt-2" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
-                The first listen belongs to the real ones.<br />Step into the world of SAB6 before anyone else. Limited entries. One night that won’t happen twice.
+                The first listen belongs to the real ones.<br />Step into the world of SAB6 befo6 anyone else. Limited entries. One night that won’t happen twice.
               </p>
 
               {/* CTA & Social Channels */}
