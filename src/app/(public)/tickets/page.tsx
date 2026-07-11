@@ -497,9 +497,8 @@ export default function TicketsPage() {
             delay={0.16}
             className="mt-8 max-w-2xl border-l border-primary/70 pl-5 md:pl-7"
           >
-            <p className="font-proxima text-xl leading-relaxed text-white/70 md:text-2xl">
-              One night. One city. One lineup built for the underground.
-              Select your tier and secure your spot before it sells out.
+            <p className="text-xl leading-relaxed text-white/70 md:text-2xl" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
+              The first listen belongs to the real ones.<br />Step into the world of SAB6 befo6 anyone else. Limited entries. One night that won’t happen twice.
             </p>
           </MotionReveal>
 
