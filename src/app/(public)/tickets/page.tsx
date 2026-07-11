@@ -331,23 +331,36 @@ export default function TicketsPage() {
   const [selectedTierId, setSelectedTierId] = useState<string>("");
 
   useEffect(() => {
-    // Hardcoded single ticket tier
-    const list = [
-      {
-        id: 'sab6-show',
-        name: 'SAB6 SHOW',
-        price: 6600, // 66 Rupees
-        description: 'Get in early for an exclusive experience.',
-        perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
-        available: true,
-        quantity_limit: 100,
-        tickets_remaining: 100,
-        max_per_order: 4
+    const FALLBACK_TIER = {
+      id: 'sab6-show',
+      name: 'SAB6 SHOW',
+      price: 6600,
+      description: 'Get in early for an exclusive experience.',
+      perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
+      available: true,
+      quantity_limit: 100,
+      tickets_remaining: 100,
+      max_per_order: 4
+    };
+
+    async function loadTiers() {
+      try {
+        const res = await fetch('/api/tickets');
+        const json = await res.json();
+        const list: TicketTier[] = res.ok && Array.isArray(json.tiers) && json.tiers.length > 0
+          ? json.tiers
+          : [FALLBACK_TIER as any];
+        setTiers(list);
+        setSelectedTierId(list[0].id);
+      } catch {
+        setTiers([FALLBACK_TIER as any]);
+        setSelectedTierId(FALLBACK_TIER.id);
+      } finally {
+        setLoading(false);
       }
-    ];
-    setTiers(list as any);
-    setSelectedTierId(list[0].id);
-    setLoading(false);
+    }
+
+    loadTiers();
   }, []);
 
   if (loading) {
@@ -460,7 +473,7 @@ export default function TicketsPage() {
             className="relative w-[80vw] max-w-[600px] aspect-[3/1] mb-6"
           >
             <Image
-              src="/SAB6 logo.jpeg"
+              src="/SAB6-logo.jpeg"
               alt="SAB6"
               fill
               className="object-contain object-left"
@@ -555,7 +568,7 @@ export default function TicketsPage() {
               {/* SAB6 logo image - large like first section */}
               <div className="relative w-full max-w-[480px] aspect-[3/1] overflow-hidden -ml-1">
                 <Image
-                  src="/SAB6 logo.jpeg"
+                  src="/SAB6-logo.jpeg"
                   alt="SAB6 Logo"
                   fill
                   className="object-contain object-left"
@@ -692,7 +705,8 @@ export default function TicketsPage() {
                         ${isSoldOut ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
                       `}
                     >
-                      {tier.id === "sab6-show" && (
+                      {/* Apply SAB6 background to all ticket tiers */}
+                      {true && (
                         <div className="absolute inset-0 z-0 pointer-events-none">
                           <Image
                             src="/SAB6/Ticket image.jpg"

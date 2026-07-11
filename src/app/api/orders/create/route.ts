@@ -33,24 +33,26 @@ export async function POST(req: NextRequest) {
 
     // ── 1. Fetch the real tier price from DB ───────────────────────────────
     let tier: any = null;
-    if (ticket_tier === 'early-vip') {
+
+    // Always try DB first — this means tiers created from the admin panel work automatically
+    const { data: dbTier, error: tierError } = await supabase
+      .from('ticket_tiers')
+      .select('price, available, quantity_limit, max_per_order')
+      .eq('id', ticket_tier)
+      .single()
+
+    if (dbTier && !tierError) {
+      tier = dbTier;
+    } else if (ticket_tier === 'sab6-show' || ticket_tier === 'early-vip') {
+      // Fallback: hardcoded tiers if not yet in DB
       tier = {
-        price: 6600, // 66 Rupees
+        price: 6600, // ₹66
         available: true,
         quantity_limit: 100,
         max_per_order: 4
       }
     } else {
-      const { data, error: tierError } = await supabase
-        .from('ticket_tiers')
-        .select('price, available, quantity_limit, max_per_order')
-        .eq('id', ticket_tier)
-        .single()
-      
-      if (tierError) {
-        return NextResponse.json({ error: 'Ticket tier not found.' }, { status: 404 })
-      }
-      tier = data;
+      return NextResponse.json({ error: 'Ticket tier not found.' }, { status: 404 })
     }
 
     if (!tier) {

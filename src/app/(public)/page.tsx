@@ -92,7 +92,7 @@ export default function Home() {
                 {/* SAB6 logo image - large like first section */}
                 <div className="relative w-full max-w-[480px] aspect-[3/1] overflow-hidden -ml-1">
                   <Image
-                    src="/SAB6 logo.jpeg"
+                    src="/SAB6-logo.jpeg"
                     alt="SAB6 Logo"
                     fill
                     className="object-contain object-left"
