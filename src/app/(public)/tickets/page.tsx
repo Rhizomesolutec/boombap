@@ -482,7 +482,7 @@ export default function TicketsPage() {
           <MotionReveal
             as="div"
             delay={0.08}
-            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6 ml-[21px] md:ml-[29px]"
+            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6 ml-[170px] md:ml-[240px]"
           >
             <Image
               src="/SAB6/SAB6 Show.PNG"
