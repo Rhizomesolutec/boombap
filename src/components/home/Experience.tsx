@@ -273,7 +273,7 @@ export default function Experience() {
           {/* Coming Soon Badge in Center of Image */}
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
             <span className="font-sarpanch text-[10px] font-bold uppercase tracking-[0.42em] text-primary bg-black/85 px-3 py-1.5 border border-primary/30 mb-3 shadow-[0_0_15px_rgba(160,239,70,0.15)]">
-              Vol. 02 Bengaluru
+              Vol. 02
             </span>
             <h3 className="font-sarpanch text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white tracking-widest">
               COMING SOON
@@ -286,7 +286,7 @@ export default function Experience() {
           {/* Corner badge */}
           <div className="exp-corner-badge">
             <span className="exp-corner-badge-label">Location</span>
-            <span className="exp-corner-badge-value">Bengaluru, IN</span>
+            <span className="exp-corner-badge-value">IN</span>
           </div>
 
           {/* Vol stamp on image */}
@@ -318,7 +318,7 @@ export default function Experience() {
               {/* Duplicate for seamless loop */}
               {[...Array(2)].map((_, i) => (
                 <span key={i} style={{ display: "inline-flex" }}>
-                  {["Live Underground Sets", "Audio-Visual Installations", "Limited Access", "Bengaluru 2025", "Community of Sound"].map((item, j) => (
+                  {["Live Underground Sets", "Audio-Visual Installations", "Limited Access", "2025", "Community of Sound"].map((item, j) => (
                     <span key={j} className="exp-ticker-item">
                       {item}
                       <span className="exp-ticker-dot" />
@@ -342,7 +342,6 @@ export default function Experience() {
           {/* Main heading */}
           <h2 className="exp-heading relative z-10">
             Vol. 02
-            <span className="accent-line">Bengaluru</span>
           </h2>
 
           {/* Features */}

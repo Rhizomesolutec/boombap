@@ -482,7 +482,7 @@ export default function TicketsPage() {
           <MotionReveal
             as="div"
             delay={0.08}
-            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6"
+            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6 ml-5 md:ml-7"
           >
             <Image
               src="/SAB6/SAB6 Show.PNG"
@@ -872,7 +872,7 @@ export default function TicketsPage() {
             {/* Coming Soon Badge in Center of Image */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
               <span className="font-sarpanch text-[10px] font-bold uppercase tracking-[0.42em] text-primary bg-black/85 px-3 py-1.5 border border-primary/30 mb-3 shadow-[0_0_15px_rgba(160,239,70,0.15)]">
-                Vol. 02 Bengaluru
+                Vol. 02
               </span>
               <h3 className="font-sarpanch text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white tracking-widest">
                 COMING SOON
@@ -885,7 +885,7 @@ export default function TicketsPage() {
             {/* Corner badge */}
             <div className="absolute bottom-10 left-8 z-10 flex flex-col gap-1">
               <span className="font-proxima text-[8px] font-bold uppercase tracking-[0.35em] text-white/35">Location</span>
-              <span className="font-sarpanch text-sm font-bold uppercase tracking-[0.08em] text-white/70">Bengaluru, IN</span>
+              <span className="font-sarpanch text-sm font-bold uppercase tracking-[0.08em] text-white/70">IN</span>
             </div>
 
             {/* Vol stamp on image */}
@@ -916,7 +916,7 @@ export default function TicketsPage() {
               <div className="vol2-ticker-inner">
                 {[...Array(2)].map((_, i) => (
                   <span key={i} style={{ display: "inline-flex" }}>
-                    {["Live Underground Sets", "Audio-Visual Installations", "Limited Access", "Bengaluru 2025", "Community of Sound"].map((item, j) => (
+                    {["Live Underground Sets", "Audio-Visual Installations", "Limited Access", "2025", "Community of Sound"].map((item, j) => (
                       <span key={j} className="vol2-ticker-item">
                         {item}
                         <span className="vol2-ticker-dot" />
@@ -943,7 +943,6 @@ export default function TicketsPage() {
             {/* Main heading */}
             <h2 className="relative z-10 font-sarpanch text-4xl md:text-6xl lg:text-7xl font-black text-white leading-none mb-14">
               Vol. 02
-              <span className="block text-transparent" style={{ WebkitTextStroke: "1px rgba(255,255,255,0.5)" }}>Bengaluru</span>
             </h2>
 
             {/* Features */}
@@ -1014,7 +1013,7 @@ export default function TicketsPage() {
                   id: "vol2-ga",
                   name: "VOL. 02 - GA PHASE 1",
                   price: "₹1,299",
-                  description: "Standard general admission access for the Vol. 02 experience in Bengaluru.",
+                  description: "Standard general admission access for the Vol. 02 experience.",
                   perks: ["General Admission Entry", "Access to Stages & Bars"]
                 },
                 {
@@ -1097,7 +1096,7 @@ export default function TicketsPage() {
             <div className="absolute bottom-0 right-0 w-[2px] h-8 bg-primary" />
 
             <span className="font-proxima text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
-              Vol. 02 Bengaluru
+              Vol. 02
             </span>
             <h2 className="mt-4 font-sarpanch text-2xl md:text-3xl font-black uppercase text-white leading-tight">
               TICKETS COMING SOON
