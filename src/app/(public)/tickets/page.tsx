@@ -345,11 +345,19 @@ export default function TicketsPage() {
 
     async function loadTiers() {
       try {
-        const res = await fetch('/api/tickets');
+        const res = await fetch('/api/tickets?available=true');
         const json = await res.json();
-        const list: TicketTier[] = res.ok && Array.isArray(json.tiers) && json.tiers.length > 0
-          ? json.tiers
-          : [FALLBACK_TIER as any];
+        let list: TicketTier[] = [];
+        if (res.ok && Array.isArray(json.tiers)) {
+          // Only show tickets containing 'SAB6' in name or ID
+          list = json.tiers.filter((t: TicketTier) =>
+            t.name.toUpperCase().includes('SAB6') ||
+            t.id.toLowerCase().includes('sab6')
+          );
+        }
+        if (list.length === 0) {
+          list = [FALLBACK_TIER as any];
+        }
         setTiers(list);
         setSelectedTierId(list[0].id);
       } catch {
