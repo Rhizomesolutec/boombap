@@ -611,9 +611,9 @@ export default function TicketsPage() {
                 <span className="font-proxima text-[9px] font-bold uppercase tracking-[0.25em] text-white/30">Connect</span>
                 <div className="flex items-center gap-3">
                   {[
-                    { img: "/SAB6/Instagram.jpg", url: "https://instagram.com" },
-                    { img: "/SAB6/Whatsapp.jpg", url: "https://whatsapp.com" },
-                    { img: "/SAB6/Youtube.jpg", url: "https://youtube.com" }
+                    { img: "/SAB6/Instagram.jpg", url: "https://www.instagram.com/lil_payyan?igsh=MW9kajd5YmFwMTRjaw==" },
+                    { img: "/SAB6/Whatsapp.jpg", url: "https://wa.me/919567355168" },
+                    { img: "/SAB6/Youtube.jpg", url: "https://youtube.com/channel/UCw_V8qjy-aEvNHoXzq7ysaA?si=eFaatKkJJOTeF5X0" }
                   ].map((soc, idx) => (
                     <a
                       key={idx}
