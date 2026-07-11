@@ -347,17 +347,21 @@ export default function TicketsPage() {
       try {
         const res = await fetch('/api/tickets?available=true');
         const json = await res.json();
-        let list: TicketTier[] = [];
+        let dbList: TicketTier[] = [];
         if (res.ok && Array.isArray(json.tiers)) {
           // Only show tickets containing 'SAB6' in name or ID
-          list = json.tiers.filter((t: TicketTier) =>
+          dbList = json.tiers.filter((t: TicketTier) =>
             t.name.toUpperCase().includes('SAB6') ||
             t.id.toLowerCase().includes('sab6')
           );
         }
-        if (list.length === 0) {
-          list = [FALLBACK_TIER as any];
-        }
+        
+        // Always include the hardcoded SAB6 SHOW ₹66 ticket, and merge any other SAB6 tiers from DB
+        const list = [
+          FALLBACK_TIER as any,
+          ...dbList.filter((t: TicketTier) => t.id !== 'sab6-show')
+        ];
+
         setTiers(list);
         setSelectedTierId(list[0].id);
       } catch {
