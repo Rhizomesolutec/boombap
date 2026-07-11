@@ -505,7 +505,7 @@ export default function TicketsPage() {
 
           <MotionReveal delay={0.24} className="mt-10 flex flex-wrap gap-4">
             <a href="#SAB6" className="boombap-button">
-              <ScrambleText text="Book Now" />
+              <ScrambleText text="Step Into SAB6" />
             </a>
           </MotionReveal>
         </div>
@@ -594,7 +594,7 @@ export default function TicketsPage() {
             </div>
 
             <p className="text-base leading-relaxed text-white/60 max-w-lg mt-2" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
-              Step into the underground. A raw audio-visual exhibition featuring exclusive sets, heavy visual projections, and a gathering of the local hip-hop community. Don't miss the first official showcase.
+              The first listen belongs to the real ones.<br />Step into the world of SAB6 before anyone else. Limited entries. One night that won’t happen twice.
             </p>
 
             {/* CTA & Social Channels */}
