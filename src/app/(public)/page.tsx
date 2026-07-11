@@ -79,16 +79,6 @@ export default function Home() {
             {/* Right side: Event headings, description, and socials */}
             <div className="w-full md:w-[50%] lg:w-[48%] flex flex-col justify-center p-8 sm:p-12 md:p-16 lg:p-24 gap-6 items-start">
               <div className="flex flex-col gap-1.5 w-full">
-                {/* Show Name Image (Main Title) - smaller */}
-                <div className="relative w-full max-w-[220px] aspect-[4/1] overflow-hidden">
-                  <Image
-                    src="/SAB6/Show Name.jpg"
-                    alt="SAB6 Show Name"
-                    fill
-                    className="object-contain object-left sab6-filter"
-                  />
-                </div>
-
                 {/* SAB6 logo image - large like first section */}
                 <div className="relative w-full max-w-[480px] aspect-[3/1] overflow-hidden -ml-1">
                   <Image

@@ -482,13 +482,13 @@ export default function TicketsPage() {
           <MotionReveal
             as="div"
             delay={0.08}
-            className="relative w-[80vw] max-w-[600px] aspect-[3/1] mb-6"
+            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6"
           >
             <Image
-              src="/SAB6-logo.jpeg"
+              src="/SAB6/SAB6 Show.PNG"
               alt="SAB6"
               fill
-              className="object-contain object-left"
+              className="object-contain object-left sab6-filter"
               priority
             />
           </MotionReveal>
@@ -507,9 +507,6 @@ export default function TicketsPage() {
             <a href="#SAB6" className="boombap-button">
               <ScrambleText text="Book Now" />
             </a>
-            <Link href="/events" className="boombap-button boombap-button--ghost">
-              <ScrambleText text="Event Details" />
-            </Link>
           </MotionReveal>
         </div>
       </section>
@@ -531,12 +528,12 @@ export default function TicketsPage() {
             content: "";
             position: absolute;
             inset: 0;
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px);
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
             pointer-events: none;
             z-index: 2;
           }
         `}</style>
-        <svg width="0" height="0" style={{ position: "absolute" }}>
+        <svg className="absolute w-0 h-0" aria-hidden="true" style={{ pointerEvents: 'none' }}>
           <filter id="remove-white-filter">
             <feColorMatrix
               type="matrix"
@@ -564,19 +561,8 @@ export default function TicketsPage() {
             <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-transparent to-black/50 z-1" />
           </div>
 
-          {/* Right side: Event headings, description, and socials */}
           <div className="w-full md:w-[50%] lg:w-[48%] flex flex-col justify-center p-8 sm:p-12 md:p-16 lg:p-24 gap-6 items-start">
             <div className="flex flex-col gap-1.5 w-full">
-              {/* Show Name Image (Main Title) - smaller */}
-              <div className="relative w-full max-w-[220px] aspect-[4/1] overflow-hidden">
-                <Image
-                  src="/SAB6/Show Name.jpg"
-                  alt="SAB6 Show Name"
-                  fill
-                  className="object-contain object-left sab6-filter"
-                />
-              </div>
-
               {/* SAB6 logo image - large like first section */}
               <div className="relative w-full max-w-[480px] aspect-[3/1] overflow-hidden -ml-1">
                 <Image
