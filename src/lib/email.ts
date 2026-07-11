@@ -73,6 +73,7 @@ function formatINR(paise: number) {
 function buildConfirmationHtml(args: SendConfirmationEmailArgs, logoUrl: string): string {
   const { buyerName, tierName, quantity, amountPaise, razorpayOrderId, razorpayPaymentId } = args
   const total = formatINR(amountPaise)
+  const supportEmail = process.env.SMTP_USER || 'support@boombap.in'
 
   const font = `'Sarpanch',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif`
 
@@ -83,7 +84,7 @@ function buildConfirmationHtml(args: SendConfirmationEmailArgs, logoUrl: string)
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <meta name="supported-color-schemes" content="dark" />
-  <title>Booking Confirmed — BoomBap Vol. 2</title>
+  <title>Booking Confirmed — SAB6 Show</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style type="text/css">
     :root { color-scheme: dark; }
@@ -134,16 +135,16 @@ function buildConfirmationHtml(args: SendConfirmationEmailArgs, logoUrl: string)
             <!-- Logo -->
             <div style="margin-bottom:4px;">
               ${logoUrl
-                ? `<img src="${logoUrl}" alt="BoomBap" width="180" style="display:inline-block;border:0;height:auto;width:180px;" />`
-                : `<span style="font-size:22px;font-weight:800;letter-spacing:3px;color:#A0EF46;font-family:${font};">BOOMBAP</span>`
+                ? `<img src="${logoUrl}" alt="SAB6" width="180" style="display:inline-block;border:0;height:auto;width:180px;" />`
+                : `<span style="font-size:22px;font-weight:800;letter-spacing:3px;color:#DE1818;font-family:${font};">SAB6</span>`
               }
             </div>
 
             <!-- Event label -->
             <div style="font-family:${font};font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#555555;margin-bottom:4px;">
-              Vol. 2
+              SAB6 Show
             </div>
-            <div style="font-family:${font};font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A0EF46;">
+            <div style="font-family:${font};font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#DE1818;">
               Booking Confirmed
             </div>
           </td>
@@ -217,7 +218,7 @@ function buildConfirmationHtml(args: SendConfirmationEmailArgs, logoUrl: string)
               style="background-color:#0d0d0d;background-image:linear-gradient(#0d0d0d,#0d0d0d);padding:16px 32px;border-top:1px solid #1a1a1a;">
             <span style="font-family:${font};font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#444444;">
               Bring a valid ID to the venue &nbsp;&middot;&nbsp;
-              <a href="mailto:[EMAIL_ADDRESS]" style="color:#555555;text-decoration:none;">[EMAIL_ADDRESS]</a>
+              <a href="mailto:${supportEmail}" style="color:#555555;text-decoration:none;">${supportEmail}</a>
             </span>
           </td>
         </tr>
@@ -242,9 +243,9 @@ export async function sendOrderConfirmationEmail(
     const html    = buildConfirmationHtml(args, logoUrl)
 
     await transporter.sendMail({
-      from: `"BoomBap" <${process.env.SMTP_USER}>`,
+      from: `"SAB6" <${process.env.SMTP_USER}>`,
       to: args.to,
-      subject: `Booking Confirmed — BoomBap Vol. 2 | ${args.quantity}x ${args.tierName}`,
+      subject: `Booking Confirmed — SAB6 Show | ${args.quantity}x ${args.tierName}`,
       html,
     })
 

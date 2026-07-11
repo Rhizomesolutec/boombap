@@ -84,13 +84,14 @@ export default function Header() {
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-6 md:h-28 md:px-16">
           <Link href="/" className="relative z-50 flex items-center justify-center group">
             <Image
-              src={"/bmbp-green-logo.png"}
+              src={pathname === "/tickets" ? "/SAB6/Boombap.jpg" : "/bmbp-green-logo.png"}
               alt="BOOMBAP Logo"
               width={128}
               height={128}
               priority
+              style={pathname === "/tickets" ? { filter: "url(#remove-white-filter)" } : undefined}
               className={`h-24 w-24 md:h-32 md:w-32 object-contain transition-all duration-500 group-hover:scale-110 ${
-                menuOpen ? "invert" : ""
+                menuOpen && pathname !== "/tickets" ? "invert" : ""
               }`}
             />
           </Link>
@@ -275,6 +276,19 @@ export default function Header() {
             backgroundSize: "200px",
           }}
         />
+        <svg width="0" height="0" style={{ position: "absolute" }}>
+          <filter id="remove-white-filter">
+            <feColorMatrix
+              type="matrix"
+              values="
+                1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                -4 -4 -4 6 0
+              "
+            />
+          </filter>
+        </svg>
       </div>
     </>
   );

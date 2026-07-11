@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   await sendOrderConfirmationEmail({
-    to: "haneenep134@gmail.com",
+    to: "adhilahammed7792@gmail.com",
     buyerName: "Muhammed Haneen",
     tierName: "Premium",
     quantity: 2,

@@ -265,10 +265,23 @@ export default function Experience() {
             alt="The Experience"
             fill
             sizes="(min-width: 768px) 52vw, 100vw"
-            className="object-cover"
+            className="object-cover opacity-45 grayscale blur-[0.5px]"
             priority
           />
           <div className="exp-image-overlay" />
+
+          {/* Coming Soon Badge in Center of Image */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
+            <span className="font-sarpanch text-[10px] font-bold uppercase tracking-[0.42em] text-primary bg-black/85 px-3 py-1.5 border border-primary/30 mb-3 shadow-[0_0_15px_rgba(160,239,70,0.15)]">
+              Vol. 02 Bengaluru
+            </span>
+            <h3 className="font-sarpanch text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white tracking-widest">
+              COMING SOON
+            </h3>
+            <p className="mt-2 font-proxima text-xs text-white/50 tracking-wider">
+              STAY TUNED FOR UPDATES
+            </p>
+          </div>
 
           {/* Corner badge */}
           <div className="exp-corner-badge">

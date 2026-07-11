@@ -61,9 +61,6 @@ export default function Footer() {
                 <p className="font-sarpanch text-2xl font-black uppercase leading-none text-white">
                   <ScrambleText text="BOOMBAP" />
                 </p>
-                <p className="mt-1 font-proxima text-[10px] uppercase tracking-[0.32em] text-primary">
-                  <ScrambleText text="Bengaluru / Vol.02" />
-                </p>
               </div>
             </Link>
 

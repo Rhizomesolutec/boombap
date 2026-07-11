@@ -8,12 +8,22 @@
   --font-sarpanch: var(--font-sarpanch);
   --font-proxima: var(--font-proxima-nova);
   --font-another-danger: 'Another Danger', sans-serif;
+  --font-selincah: 'Selincah', sans-serif;
 }
 
 @font-face {
   font-family: 'Another Danger';
   src: url('/fonts/another-danger.woff2') format('woff2'),
        url('/fonts/another-danger.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Selincah';
+  src: url('/fonts/SELINCAH.ttf') format('truetype'),
+       url('/fonts/SELINCAH.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
