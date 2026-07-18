@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
     const status = searchParams.get('status')
     const search = searchParams.get('search')
-    const limit = Math.min(Number(searchParams.get('limit') ?? 50), 200)
+    const limit = Math.min(Number(searchParams.get('limit') ?? 50), 10000)
     const offset = Number(searchParams.get('offset') ?? 0)
 
     // 1. Fetch tiers for display name lookup

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/src/components/ui/Icon";
 import { formatPrice, formatDate } from "@/src/lib/utils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 interface Order {
@@ -107,6 +109,184 @@ export default function AdminOrdersPage() {
     fetchKPIs();
   }, []);
 
+  // ─── PDF Download ──────────────────────────────────────────────────────────
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadPDF = async () => {
+    setDownloading(true);
+    try {
+      // Fetch ALL orders matching current filter/search (no pagination)
+      const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
+      const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : "";
+
+      // Fetch orders and global stats in parallel
+      const [ordersRes, statsRes] = await Promise.all([
+        fetch(`/api/orders?limit=10000&offset=0${statusParam}${searchParam}`),
+        fetch("/api/tickets/stats"),
+      ]);
+      if (!ordersRes.ok) throw new Error("Failed to fetch orders for export.");
+      const data = await ordersRes.json();
+      const allOrders: Order[] = data.orders ?? [];
+
+      // Use /api/tickets/stats for KPIs — same source as the admin panel dashboard
+      let kpiRevenue = "N/A";
+      let kpiTickets = "N/A";
+      let kpiPending = "N/A";
+      let kpiTotal   = "N/A";
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        const s = statsData.summary;
+        kpiRevenue = `Rs. ${s.total_revenue_rupees.toLocaleString("en-IN")}`;
+        kpiTickets = String(s.total_sold);
+        kpiPending = String(s.total_pending);
+        kpiTotal   = String(s.total_sold + s.total_pending + s.total_failed);
+      }
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const now = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
+
+      // ── Header band ──────────────────────────────────────────────────────
+      doc.setFillColor(10, 10, 10);
+      doc.rect(0, 0, pageW, 22, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(160, 239, 70); // lime green accent
+      doc.text("BOOMBAP", 10, 10);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(180, 180, 180);
+      doc.text("Admin · Orders Report", 10, 16);
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(130, 130, 130);
+      doc.text(`Generated: ${now}`, pageW - 10, 10, { align: "right" });
+
+      const filterLabel =
+        statusFilter !== "all" ? `Status: ${statusFilter.toUpperCase()}` : "Status: ALL";
+      const searchLabel = debouncedSearch ? `  ·  Search: "${debouncedSearch}"` : "";
+      doc.text(`${filterLabel}${searchLabel}  ·  ${allOrders.length} record(s)`, pageW - 10, 16, { align: "right" });
+
+      // ── KPI summary row — sourced from /api/tickets/stats (matches admin panel) ──
+      const kpiY = 28;
+      const kpiBoxW = 55;
+      const kpiBoxH = 16;
+      const kpiItems = [
+        { label: "Total Paid Revenue", value: kpiRevenue },
+        { label: "Tickets Issued",     value: kpiTickets },
+        { label: "Pending Orders",     value: kpiPending },
+        { label: "Total Attempts",     value: kpiTotal   },
+      ];
+
+      kpiItems.forEach((kpi, i) => {
+        const x = 10 + i * (kpiBoxW + 4);
+        doc.setFillColor(20, 20, 20);
+        doc.roundedRect(x, kpiY, kpiBoxW, kpiBoxH, 1.5, 1.5, "F");
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(120, 120, 120);
+        doc.text(kpi.label.toUpperCase(), x + 3, kpiY + 5);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(240, 240, 240);
+        doc.text(kpi.value, x + 3, kpiY + 13);
+      });
+
+      // ── Orders table ──────────────────────────────────────────────────────
+      autoTable(doc, {
+        startY: kpiY + kpiBoxH + 6,
+        margin: { left: 10, right: 10 },
+        head: [[
+          "#",
+          "Order ID",
+          "Customer Name",
+          "Email",
+          "Phone",
+          "Tier",
+          "Qty",
+          "Amount",
+          "Status",
+          "Date",
+        ]],
+        body: allOrders.map((o, idx) => [
+          idx + 1,
+          o.razorpay_order_id,
+          o.buyer_name,
+          o.buyer_email,
+          o.buyer_phone,
+          o.ticket_tier_name,
+          o.quantity,
+          `Rs. ${(o.amount_paise / 100).toLocaleString("en-IN")}`,
+          o.status.toUpperCase(),
+          formatDate(o.created_at),
+        ]),
+        styles: {
+          fontSize: 7,
+          cellPadding: 2.5,
+          textColor: [220, 220, 220],
+          lineColor: [35, 35, 35],
+          lineWidth: 0.3,
+          overflow: "linebreak",
+        },
+        headStyles: {
+          fillColor: [20, 20, 20],
+          textColor: [100, 100, 100],
+          fontStyle: "bold",
+          fontSize: 6.5,
+          halign: "left",
+        },
+        alternateRowStyles: { fillColor: [15, 15, 15] },
+        bodyStyles: { fillColor: [10, 10, 10] },
+        columnStyles: {
+          0:  { cellWidth: 8,  halign: "center" },
+          1:  { cellWidth: 38, font: "courier", fontSize: 6 },
+          2:  { cellWidth: 30 },
+          3:  { cellWidth: 42, font: "courier", fontSize: 6 },
+          4:  { cellWidth: 22, font: "courier" },
+          5:  { cellWidth: 22 },
+          6:  { cellWidth: 10, halign: "center" },
+          7:  { cellWidth: 22, halign: "right" },
+          8:  { cellWidth: 18, halign: "center" },
+          9:  { cellWidth: 30 },
+        },
+        didParseCell(hookData) {
+          if (hookData.section === "body" && hookData.column.index === 8) {
+            const val = String(hookData.cell.raw ?? "");
+            if (val === "PAID")    hookData.cell.styles.textColor = [160, 239, 70];
+            if (val === "PENDING") hookData.cell.styles.textColor = [251, 191, 36];
+            if (val === "FAILED")  hookData.cell.styles.textColor = [248, 113, 113];
+          }
+        },
+        // Page footer with page numbers
+        didDrawPage(hookData) {
+          const footerY = doc.internal.pageSize.getHeight() - 6;
+          doc.setFontSize(6.5);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(80, 80, 80);
+          doc.text(
+            `Page ${hookData.pageNumber}`,
+            pageW / 2,
+            footerY,
+            { align: "center" }
+          );
+          doc.text("BOOMBAP · Confidential", 10, footerY);
+          doc.text(`boombap.in`, pageW - 10, footerY, { align: "right" });
+        },
+      });
+
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const filterSlug = statusFilter !== "all" ? `_${statusFilter}` : "";
+      doc.save(`boombap_orders${filterSlug}_${dateStamp}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
 
 
   return (
@@ -118,16 +298,40 @@ export default function AdminOrdersPage() {
           <h1 className="text-xl font-black uppercase tracking-wide text-white">Orders</h1>
           <p className="text-xs text-white/35 mt-0.5">Track ticket sales, customer logs, and payment states</p>
         </div>
-        <button
-          onClick={() => {
-            fetchOrders();
-            fetchKPIs();
-          }}
-          className="flex items-center justify-center gap-2 border border-white/8 hover:border-white/20 bg-white/2 hover:bg-white/6 text-white text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors self-start sm:self-auto cursor-pointer"
-        >
-          <Icon d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" size={13} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {/* Download PDF */}
+          <button
+            onClick={downloadPDF}
+            disabled={downloading}
+            className="flex items-center justify-center gap-2 border border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {downloading ? (
+              <>
+                <svg className="animate-spin" width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
+                  <path d="M12 2a10 10 0 0 1 10 10" />
+                </svg>
+                Exporting…
+              </>
+            ) : (
+              <>
+                <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={13} />
+                Download PDF
+              </>
+            )}
+          </button>
+          {/* Refresh */}
+          <button
+            onClick={() => {
+              fetchOrders();
+              fetchKPIs();
+            }}
+            className="flex items-center justify-center gap-2 border border-white/8 hover:border-white/20 bg-white/2 hover:bg-white/6 text-white text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors cursor-pointer"
+          >
+            <Icon d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" size={13} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* ── KPI Row ───────────────────────────────────────────────────────── */}
