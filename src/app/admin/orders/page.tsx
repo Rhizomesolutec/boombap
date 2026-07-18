@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/src/components/ui/Icon";
 import { formatPrice, formatDate } from "@/src/lib/utils";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 interface Order {
@@ -109,17 +108,16 @@ export default function AdminOrdersPage() {
     fetchKPIs();
   }, []);
 
-  // ─── PDF Download ──────────────────────────────────────────────────────────
+  // ─── XLSX Download ─────────────────────────────────────────────────────────
   const [downloading, setDownloading] = useState(false);
 
-  const downloadPDF = async () => {
+  const downloadXLSX = async () => {
     setDownloading(true);
     try {
-      // Fetch ALL orders matching current filter/search (no pagination)
       const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
       const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : "";
 
-      // Fetch orders and global stats in parallel
+      // Fetch all orders + global stats in parallel
       const [ordersRes, statsRes] = await Promise.all([
         fetch(`/api/orders?limit=10000&offset=0${statusParam}${searchParam}`),
         fetch("/api/tickets/stats"),
@@ -128,160 +126,93 @@ export default function AdminOrdersPage() {
       const data = await ordersRes.json();
       const allOrders: Order[] = data.orders ?? [];
 
-      // Use /api/tickets/stats for KPIs — same source as the admin panel dashboard
-      let kpiRevenue = "N/A";
-      let kpiTickets = "N/A";
-      let kpiPending = "N/A";
-      let kpiTotal   = "N/A";
+      // KPIs from /api/tickets/stats — same source as the admin panel
+      let kpiRevenue = "N/A", kpiTickets = "N/A", kpiPending = "N/A", kpiTotal = "N/A";
       if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        const s = statsData.summary;
+        const sd = await statsRes.json();
+        const s = sd.summary;
         kpiRevenue = `Rs. ${s.total_revenue_rupees.toLocaleString("en-IN")}`;
         kpiTickets = String(s.total_sold);
         kpiPending = String(s.total_pending);
         kpiTotal   = String(s.total_sold + s.total_pending + s.total_failed);
       }
 
-      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-      const pageW = doc.internal.pageSize.getWidth();
-      const now = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
+      const now = new Date().toLocaleString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: true,
+      });
+      const filterLabel = statusFilter !== "all" ? `Status: ${statusFilter.toUpperCase()}` : "Status: ALL";
+      const searchLabel = debouncedSearch ? ` | Search: "${debouncedSearch}"` : "";
 
-      // ── Header band ──────────────────────────────────────────────────────
-      doc.setFillColor(10, 10, 10);
-      doc.rect(0, 0, pageW, 22, "F");
+      const wb = XLSX.utils.book_new();
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(160, 239, 70); // lime green accent
-      doc.text("BOOMBAP", 10, 10);
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(180, 180, 180);
-      doc.text("Admin · Orders Report", 10, 16);
-
-      doc.setFontSize(7.5);
-      doc.setTextColor(130, 130, 130);
-      doc.text(`Generated: ${now}`, pageW - 10, 10, { align: "right" });
-
-      const filterLabel =
-        statusFilter !== "all" ? `Status: ${statusFilter.toUpperCase()}` : "Status: ALL";
-      const searchLabel = debouncedSearch ? `  ·  Search: "${debouncedSearch}"` : "";
-      doc.text(`${filterLabel}${searchLabel}  ·  ${allOrders.length} record(s)`, pageW - 10, 16, { align: "right" });
-
-      // ── KPI summary row — sourced from /api/tickets/stats (matches admin panel) ──
-      const kpiY = 28;
-      const kpiBoxW = 55;
-      const kpiBoxH = 16;
-      const kpiItems = [
-        { label: "Total Paid Revenue", value: kpiRevenue },
-        { label: "Tickets Issued",     value: kpiTickets },
-        { label: "Pending Orders",     value: kpiPending },
-        { label: "Total Attempts",     value: kpiTotal   },
+      // ── Sheet 1: Summary ─────────────────────────────────────────────────
+      const summaryData = [
+        ["BOOMBAP — Admin Orders Report"],
+        [`Generated: ${now}`],
+        [`Filter: ${filterLabel}${searchLabel}`],
+        [`Total Records Exported: ${allOrders.length}`],
+        [],
+        ["METRIC", "VALUE"],
+        ["Total Paid Revenue",  kpiRevenue],
+        ["Tickets Issued",      kpiTickets],
+        ["Pending Orders",      kpiPending],
+        ["Total Attempts",      kpiTotal],
       ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      wsSummary["!cols"] = [{ wch: 30 }, { wch: 22 }];
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
-      kpiItems.forEach((kpi, i) => {
-        const x = 10 + i * (kpiBoxW + 4);
-        doc.setFillColor(20, 20, 20);
-        doc.roundedRect(x, kpiY, kpiBoxW, kpiBoxH, 1.5, 1.5, "F");
-        doc.setFontSize(6.5);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(120, 120, 120);
-        doc.text(kpi.label.toUpperCase(), x + 3, kpiY + 5);
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(240, 240, 240);
-        doc.text(kpi.value, x + 3, kpiY + 13);
-      });
+      // ── Sheet 2: Orders ───────────────────────────────────────────────────
+      const headers = [
+        "#",
+        "Order ID",
+        "Customer Name",
+        "Email",
+        "Phone",
+        "Ticket Tier",
+        "Quantity",
+        "Amount (Rs.)",
+        "Status",
+        "Razorpay Payment ID",
+        "Date",
+      ];
+      const rows = allOrders.map((o, idx) => [
+        idx + 1,
+        o.razorpay_order_id,
+        o.buyer_name,
+        o.buyer_email,
+        o.buyer_phone,
+        o.ticket_tier_name,
+        o.quantity,
+        o.amount_paise / 100,
+        o.status.toUpperCase(),
+        o.razorpay_payment_id ?? "N/A",
+        formatDate(o.created_at),
+      ]);
+      const wsOrders = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      wsOrders["!cols"] = [
+        { wch: 5  },  // #
+        { wch: 30 },  // Order ID
+        { wch: 22 },  // Customer Name
+        { wch: 30 },  // Email
+        { wch: 16 },  // Phone
+        { wch: 18 },  // Tier
+        { wch: 10 },  // Qty
+        { wch: 14 },  // Amount
+        { wch: 10 },  // Status
+        { wch: 28 },  // Payment ID
+        { wch: 22 },  // Date
+      ];
+      XLSX.utils.book_append_sheet(wb, wsOrders, "Orders");
 
-      // ── Orders table ──────────────────────────────────────────────────────
-      autoTable(doc, {
-        startY: kpiY + kpiBoxH + 6,
-        margin: { left: 10, right: 10 },
-        head: [[
-          "#",
-          "Order ID",
-          "Customer Name",
-          "Email",
-          "Phone",
-          "Tier",
-          "Qty",
-          "Amount",
-          "Status",
-          "Date",
-        ]],
-        body: allOrders.map((o, idx) => [
-          idx + 1,
-          o.razorpay_order_id,
-          o.buyer_name,
-          o.buyer_email,
-          o.buyer_phone,
-          o.ticket_tier_name,
-          o.quantity,
-          `Rs. ${(o.amount_paise / 100).toLocaleString("en-IN")}`,
-          o.status.toUpperCase(),
-          formatDate(o.created_at),
-        ]),
-        styles: {
-          fontSize: 7,
-          cellPadding: 2.5,
-          textColor: [220, 220, 220],
-          lineColor: [35, 35, 35],
-          lineWidth: 0.3,
-          overflow: "linebreak",
-        },
-        headStyles: {
-          fillColor: [20, 20, 20],
-          textColor: [100, 100, 100],
-          fontStyle: "bold",
-          fontSize: 6.5,
-          halign: "left",
-        },
-        alternateRowStyles: { fillColor: [15, 15, 15] },
-        bodyStyles: { fillColor: [10, 10, 10] },
-        columnStyles: {
-          0:  { cellWidth: 8,  halign: "center" },
-          1:  { cellWidth: 38, font: "courier", fontSize: 6 },
-          2:  { cellWidth: 30 },
-          3:  { cellWidth: 42, font: "courier", fontSize: 6 },
-          4:  { cellWidth: 22, font: "courier" },
-          5:  { cellWidth: 22 },
-          6:  { cellWidth: 10, halign: "center" },
-          7:  { cellWidth: 22, halign: "right" },
-          8:  { cellWidth: 18, halign: "center" },
-          9:  { cellWidth: 30 },
-        },
-        didParseCell(hookData) {
-          if (hookData.section === "body" && hookData.column.index === 8) {
-            const val = String(hookData.cell.raw ?? "");
-            if (val === "PAID")    hookData.cell.styles.textColor = [160, 239, 70];
-            if (val === "PENDING") hookData.cell.styles.textColor = [251, 191, 36];
-            if (val === "FAILED")  hookData.cell.styles.textColor = [248, 113, 113];
-          }
-        },
-        // Page footer with page numbers
-        didDrawPage(hookData) {
-          const footerY = doc.internal.pageSize.getHeight() - 6;
-          doc.setFontSize(6.5);
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(80, 80, 80);
-          doc.text(
-            `Page ${hookData.pageNumber}`,
-            pageW / 2,
-            footerY,
-            { align: "center" }
-          );
-          doc.text("BOOMBAP · Confidential", 10, footerY);
-          doc.text(`boombap.in`, pageW - 10, footerY, { align: "right" });
-        },
-      });
-
+      // ── Trigger download ──────────────────────────────────────────────────
       const dateStamp = new Date().toISOString().slice(0, 10);
       const filterSlug = statusFilter !== "all" ? `_${statusFilter}` : "";
-      doc.save(`boombap_orders${filterSlug}_${dateStamp}.pdf`);
+      XLSX.writeFile(wb, `boombap_orders${filterSlug}_${dateStamp}.xlsx`);
     } catch (err) {
-      console.error("PDF export failed:", err);
-      alert("Failed to generate PDF. Please try again.");
+      console.error("XLSX export failed:", err);
+      alert("Failed to generate Excel file. Please try again.");
     } finally {
       setDownloading(false);
     }
@@ -299,9 +230,9 @@ export default function AdminOrdersPage() {
           <p className="text-xs text-white/35 mt-0.5">Track ticket sales, customer logs, and payment states</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          {/* Download PDF */}
+          {/* Download XLSX */}
           <button
-            onClick={downloadPDF}
+            onClick={downloadXLSX}
             disabled={downloading}
             className="flex items-center justify-center gap-2 border border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
@@ -316,7 +247,7 @@ export default function AdminOrdersPage() {
             ) : (
               <>
                 <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={13} />
-                Download PDF
+                Download XLSX
               </>
             )}
           </button>
