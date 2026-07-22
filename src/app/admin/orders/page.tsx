@@ -111,10 +111,11 @@ export default function AdminOrdersPage() {
   // ─── XLSX Download ─────────────────────────────────────────────────────────
   const [downloading, setDownloading] = useState(false);
 
-  const downloadXLSX = async () => {
+  const downloadXLSX = async (onlyPaid = false) => {
     setDownloading(true);
     try {
-      const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
+      const targetStatus = onlyPaid ? "paid" : statusFilter;
+      const statusParam = targetStatus !== "all" ? `&status=${targetStatus}` : "";
       const searchParam = debouncedSearch ? `&search=${encodeURIComponent(debouncedSearch)}` : "";
 
       // Fetch all orders + global stats in parallel
@@ -124,7 +125,14 @@ export default function AdminOrdersPage() {
       ]);
       if (!ordersRes.ok) throw new Error("Failed to fetch orders for export.");
       const data = await ordersRes.json();
-      const allOrders: Order[] = data.orders ?? [];
+      let allOrders: Order[] = data.orders ?? [];
+
+      if (onlyPaid) {
+        allOrders = allOrders.filter((o) => o.status?.toLowerCase() === "paid");
+      }
+
+      // ── Sort quantity wise: 1-ticket orders first, 2-ticket orders second, 3-ticket orders third... ──
+      allOrders.sort((a, b) => a.quantity - b.quantity);
 
       // KPIs from /api/tickets/stats — same source as the admin panel
       let kpiRevenue = "N/A", kpiTickets = "N/A", kpiPending = "N/A", kpiTotal = "N/A";
@@ -141,7 +149,7 @@ export default function AdminOrdersPage() {
         day: "2-digit", month: "short", year: "numeric",
         hour: "2-digit", minute: "2-digit", hour12: true,
       });
-      const filterLabel = statusFilter !== "all" ? `Status: ${statusFilter.toUpperCase()}` : "Status: ALL";
+      const filterLabel = onlyPaid ? "Status: PAID USERS ONLY (Quantity Wise)" : (statusFilter !== "all" ? `Status: ${statusFilter.toUpperCase()}` : "Status: ALL");
       const searchLabel = debouncedSearch ? ` | Search: "${debouncedSearch}"` : "";
 
       const wb = XLSX.utils.book_new();
@@ -163,7 +171,7 @@ export default function AdminOrdersPage() {
       wsSummary["!cols"] = [{ wch: 30 }, { wch: 22 }];
       XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
-      // ── Sheet 2: Orders ───────────────────────────────────────────────────
+      // Helper function to build sheet rows
       const headers = [
         "#",
         "Order ID",
@@ -177,38 +185,46 @@ export default function AdminOrdersPage() {
         "Razorpay Payment ID",
         "Date",
       ];
-      const rows = allOrders.map((o, idx) => [
-        idx + 1,
-        o.razorpay_order_id,
-        o.buyer_name,
-        o.buyer_email,
-        o.buyer_phone,
-        o.ticket_tier_name,
-        o.quantity,
-        o.amount_paise / 100,
-        o.status.toUpperCase(),
-        o.razorpay_payment_id ?? "N/A",
-        formatDate(o.created_at),
-      ]);
-      const wsOrders = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      wsOrders["!cols"] = [
-        { wch: 5  },  // #
-        { wch: 30 },  // Order ID
-        { wch: 22 },  // Customer Name
-        { wch: 30 },  // Email
-        { wch: 16 },  // Phone
-        { wch: 18 },  // Tier
-        { wch: 10 },  // Qty
-        { wch: 14 },  // Amount
-        { wch: 10 },  // Status
-        { wch: 28 },  // Payment ID
-        { wch: 22 },  // Date
-      ];
-      XLSX.utils.book_append_sheet(wb, wsOrders, "Orders");
+
+      const buildSheet = (list: Order[]) => {
+        const rows = list.map((o, idx) => [
+          idx + 1,
+          o.razorpay_order_id,
+          o.buyer_name,
+          o.buyer_email,
+          o.buyer_phone,
+          o.ticket_tier_name,
+          o.quantity,
+          o.amount_paise / 100,
+          o.status.toUpperCase(),
+          o.razorpay_payment_id ?? "N/A",
+          formatDate(o.created_at),
+        ]);
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws["!cols"] = [
+          { wch: 5 }, { wch: 30 }, { wch: 22 }, { wch: 30 }, { wch: 16 },
+          { wch: 18 }, { wch: 10 }, { wch: 14 }, { wch: 10 }, { wch: 28 }, { wch: 22 },
+        ];
+        return ws;
+      };
+
+      // ── Main Orders Sheet (Sorted by Quantity) ─────────────────────────
+      XLSX.utils.book_append_sheet(wb, buildSheet(allOrders), onlyPaid ? "Paid (Qty Sorted)" : "Orders");
+
+      // ── Additional Quantity Breakdown Sheets for Paid Users ─────────────
+      if (onlyPaid) {
+        const qty1 = allOrders.filter((o) => o.quantity === 1);
+        const qty2 = allOrders.filter((o) => o.quantity === 2);
+        const qty3Plus = allOrders.filter((o) => o.quantity >= 3);
+
+        if (qty1.length > 0) XLSX.utils.book_append_sheet(wb, buildSheet(qty1), "1 Ticket Orders");
+        if (qty2.length > 0) XLSX.utils.book_append_sheet(wb, buildSheet(qty2), "2 Ticket Orders");
+        if (qty3Plus.length > 0) XLSX.utils.book_append_sheet(wb, buildSheet(qty3Plus), "3+ Ticket Orders");
+      }
 
       // ── Trigger download ──────────────────────────────────────────────────
       const dateStamp = new Date().toISOString().slice(0, 10);
-      const filterSlug = statusFilter !== "all" ? `_${statusFilter}` : "";
+      const filterSlug = onlyPaid ? "_paid_users_qty_wise" : (statusFilter !== "all" ? `_${statusFilter}` : "");
       XLSX.writeFile(wb, `boombap_orders${filterSlug}_${dateStamp}.xlsx`);
     } catch (err) {
       console.error("XLSX export failed:", err);
@@ -229,10 +245,32 @@ export default function AdminOrdersPage() {
           <h1 className="text-xl font-black uppercase tracking-wide text-white">Orders</h1>
           <p className="text-xs text-white/35 mt-0.5">Track ticket sales, customer logs, and payment states</p>
         </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          {/* Download XLSX */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Download Paid Users XLSX */}
           <button
-            onClick={downloadXLSX}
+            onClick={() => downloadXLSX(true)}
+            disabled={downloading}
+            className="flex items-center justify-center gap-2 border border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {downloading ? (
+              <>
+                <svg className="animate-spin" width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
+                  <path d="M12 2a10 10 0 0 1 10 10" />
+                </svg>
+                Exporting…
+              </>
+            ) : (
+              <>
+                <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={13} />
+                Download Paid Users (XLSX)
+              </>
+            )}
+          </button>
+
+          {/* Download All XLSX */}
+          <button
+            onClick={() => downloadXLSX(false)}
             disabled={downloading}
             className="flex items-center justify-center gap-2 border border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
@@ -247,7 +285,7 @@ export default function AdminOrdersPage() {
             ) : (
               <>
                 <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={13} />
-                Download XLSX
+                Download All (XLSX)
               </>
             )}
           </button>

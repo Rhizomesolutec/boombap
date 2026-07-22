@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = createServerSupabaseClient()
     await ensureDefaultSAB6Tiers(supabase)
-    
+
     const { searchParams } = new URL(req.url)
     const onlyAvailable = searchParams.get('available') === 'true'
 
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ tiers })
   } catch (err: any) {
     console.error('GET /api/tickets error:', err)
-    
+
     // Fallback if Supabase is not configured yet (e.g. missing env variables)
     if (err.message && (err.message.includes('NEXT_PUBLIC_SUPABASE_URL') || err.message.includes('SUPABASE_SERVICE_ROLE_KEY'))) {
       return NextResponse.json({

@@ -10,6 +10,7 @@ import ScrambleText from "../../../components/ui/ScrambleText";
 
 // Utility: paise → readable rupee string
 function formatPrice(paise: number) {
+  if (paise === 66) return "₹66";
   return `₹${(paise / 100).toLocaleString("en-IN")}`;
 }
 
@@ -331,38 +332,44 @@ export default function TicketsPage() {
   const [selectedTierId, setSelectedTierId] = useState<string>("");
 
   useEffect(() => {
-    const FALLBACK_TIER = {
+    const SAB6_66_TIER = {
       id: 'sab6-show',
       name: 'SAB6 SHOW',
       price: 6600,
       description: 'Get in early for an exclusive experience.',
       perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
-      available: true,
+      available: false,
       quantity_limit: 100,
-      tickets_remaining: 100,
+      tickets_remaining: 0,
       max_per_order: 4
     };
 
     async function loadTiers() {
       try {
-        const res = await fetch('/api/tickets?available=true');
+        const res = await fetch('/api/tickets');
         const json = await res.json();
-        let dbList: TicketTier[] = [];
+        let matched: TicketTier | null = null;
         if (res.ok && Array.isArray(json.tiers)) {
-          // Only show tickets containing 'SAB6' in name or ID
-          dbList = json.tiers.filter((t: TicketTier) =>
-            t.name.toUpperCase().includes('SAB6') ||
-            t.id.toLowerCase().includes('sab6')
-          );
+          matched = json.tiers.find((t: TicketTier) =>
+            t.id === 'sab6-show' || (t.name.toUpperCase().includes('SAB6 SHOW') && (t.price === 6600 || t.price === 66))
+          ) || null;
         }
-        
-        const list = dbList.length > 0 ? dbList : [FALLBACK_TIER as any];
 
-        setTiers(list);
-        setSelectedTierId(list[0].id);
+        const singleTier = matched
+          ? {
+              ...matched,
+              name: 'SAB6 SHOW',
+              price: matched.price === 66 ? 6600 : matched.price,
+              available: false,
+              tickets_remaining: 0
+            }
+          : SAB6_66_TIER;
+
+        setTiers([singleTier as any]);
+        setSelectedTierId(singleTier.id);
       } catch {
-        setTiers([FALLBACK_TIER as any]);
-        setSelectedTierId(FALLBACK_TIER.id);
+        setTiers([SAB6_66_TIER as any]);
+        setSelectedTierId(SAB6_66_TIER.id);
       } finally {
         setLoading(false);
       }
@@ -677,36 +684,32 @@ export default function TicketsPage() {
             <div className="flex flex-col gap-4">
               {tiers.map((tier, i) => {
                 const active = tier.id === selectedTierId;
-                const remaining = tier.tickets_remaining !== undefined ? tier.tickets_remaining : tier.quantity_limit;
-                const isSoldOut = !tier.available || remaining <= 0;
                 return (
                   <MotionReveal key={tier.id} delay={i * 0.07}>
                     <button
                       id={`tier-${tier.id}`}
                       type="button"
+                      disabled={true}
                       onClick={() => setSelectedTierId(tier.id)}
-                      disabled={isSoldOut}
                       className={`
                         group w-[85%] text-left border p-6 transition-all duration-200 md:p-7 min-h-[480px] flex flex-col justify-center gap-6 relative overflow-hidden
                         ${active
                           ? "border-primary bg-primary/8 shadow-[6px_6px_0_rgba(222,24,24,0.28)]"
                           : "border-white/10 bg-white/2.5 hover:border-white/22 hover:bg-white/4"
                         }
-                        ${isSoldOut ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                        opacity-85 cursor-not-allowed
                       `}
                     >
-                      {/* Apply SAB6 background to all ticket tiers */}
-                      {true && (
-                        <div className="absolute inset-0 z-0 pointer-events-none">
-                          <Image
-                            src="/SAB6/Ticket image.jpg"
-                            alt="SAB6 Show Card Background"
-                            fill
-                            className="object-cover opacity-25 group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-black/55" />
-                        </div>
-                      )}
+                      {/* SAB6 background image (kept still and visible) */}
+                      <div className="absolute inset-0 z-0 pointer-events-none">
+                        <Image
+                          src="/SAB6/Ticket image.jpg"
+                          alt="SAB6 Show Card Background"
+                          fill
+                          className="object-cover opacity-30"
+                        />
+                        <div className="absolute inset-0 bg-black/55" />
+                      </div>
                       <div className="relative z-10 flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
                           {/* Radio dot */}
@@ -722,10 +725,10 @@ export default function TicketsPage() {
                             )}
                           </span>
                           <div>
-                            <span className="font-proxima text-[9px] font-black uppercase tracking-[0.32em] text-white/40">
-                              {isSoldOut ? "Sold Out" : "Available"}
+                            <span className="font-proxima text-[9px] font-black uppercase tracking-[0.32em] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 inline-block">
+                              TICKETS CLOSED
                             </span>
-                            <div className="mt-1 font-proxima text-[10px] font-bold uppercase tracking-[0.25em] text-primary/80">
+                            <div className="mt-2 font-proxima text-[10px] font-bold uppercase tracking-[0.25em] text-primary/80">
                               {tier.id}
                             </div>
                             <h3 className="mt-0.5 font-sarpanch text-2xl font-black uppercase text-white">
@@ -763,36 +766,64 @@ export default function TicketsPage() {
               })}
             </div>
 
-            {/* ── RIGHT: booking form ── */}
+            {/* ── RIGHT: booking option (showing layout but not allowed to use with TICKETS CLOSED overlay) ── */}
             {selectedTier && (
               <MotionReveal
                 delay={0.12}
-                className="sticky top-28 border border-white/12 bg-white/2.5 p-6 md:p-8"
+                className="sticky top-28 relative overflow-hidden rounded-sm"
               >
-                {/* Form header */}
-                <div className="mb-7 flex items-center justify-between border-b border-white/8 pb-6">
-                  <div>
-                    <span className="font-proxima text-[9px] font-black uppercase tracking-[0.34em] text-primary">
-                      Your Booking · {selectedTier.id}
-                    </span>
-                    <h2 className="mt-2 font-sarpanch text-2xl font-black uppercase text-white">
-                      {selectedTier.name} Ticket
-                    </h2>
-                  </div>
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={selectedTierId}
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 6 }}
-                      className="font-sarpanch text-3xl font-black text-primary"
-                    >
+                {/* Form layout backdrop (showing booking options, disabled & non-interactive) */}
+                <div className="border border-white/12 bg-white/2.5 p-6 md:p-8 filter blur-[1.5px] opacity-35 select-none pointer-events-none">
+                  {/* Form header */}
+                  <div className="mb-7 flex items-center justify-between border-b border-white/8 pb-6">
+                    <div>
+                      <span className="font-proxima text-[9px] font-black uppercase tracking-[0.34em] text-primary">
+                        Your Booking · {selectedTier.id}
+                      </span>
+                      <h2 className="mt-2 font-sarpanch text-2xl font-black uppercase text-white">
+                        {selectedTier.name} Ticket
+                      </h2>
+                    </div>
+                    <span className="font-sarpanch text-3xl font-black text-primary">
                       {formatPrice(selectedTier.price)}
-                    </motion.span>
-                  </AnimatePresence>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <div className="h-11 bg-white/5 border border-white/10 px-4 py-3 font-proxima text-xs text-white/30 flex items-center">
+                      Full Name
+                    </div>
+                    <div className="h-11 bg-white/5 border border-white/10 px-4 py-3 font-proxima text-xs text-white/30 flex items-center">
+                      Email Address
+                    </div>
+                    <div className="h-11 bg-white/5 border border-white/10 px-4 py-3 font-proxima text-xs text-white/30 flex items-center">
+                      Phone Number
+                    </div>
+                    <div className="h-12 border border-primary/30 bg-primary/20 flex items-center justify-center font-sarpanch font-black text-primary uppercase text-sm tracking-widest">
+                      TICKETS CLOSED
+                    </div>
+                  </div>
                 </div>
 
-                <BookingForm selectedTier={selectedTier} />
+                {/* Floating Closed Badge Overlay in Center */}
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
+                  <div className="w-full max-w-sm border border-primary/40 bg-black/90 backdrop-blur-md p-6 shadow-2xl relative">
+                    <div className="absolute top-0 left-0 w-6 h-[2px] bg-primary" />
+                    <div className="absolute top-0 left-0 w-[2px] h-6 bg-primary" />
+                    <div className="absolute bottom-0 right-0 w-6 h-[2px] bg-primary" />
+                    <div className="absolute bottom-0 right-0 w-[2px] h-6 bg-primary" />
+
+                    <span className="font-sarpanch text-[10px] font-bold uppercase tracking-[0.42em] text-primary bg-primary/10 border border-primary/30 px-3 py-1.5 mb-3 inline-block">
+                      SAB6 Show
+                    </span>
+                    <h3 className="font-sarpanch text-2xl md:text-3xl font-black uppercase text-white tracking-widest">
+                      TICKETS CLOSED
+                    </h3>
+                    <p className="mt-2 font-proxima text-xs text-white/60 leading-relaxed">
+                      Ticket sales for the SAB6 Show are officially closed. No further bookings are available.
+                    </p>
+                  </div>
+                </div>
               </MotionReveal>
             )}
           </div>

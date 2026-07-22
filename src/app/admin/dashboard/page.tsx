@@ -141,10 +141,20 @@ export default function DashboardPage() {
     fetchRecentOrders();
   }, [activeTab]);
 
-  const handleExport = () => {
-    if (orders.length === 0) return;
+  const handleExport = (paidOnly = false) => {
+    let targetOrders = [...orders];
+    if (paidOnly) {
+      targetOrders = targetOrders.filter((o) => o.status?.toLowerCase() === "paid");
+    }
+    // Sort quantity wise (1 ticket first, then 2 tickets, then 3 tickets...)
+    targetOrders.sort((a, b) => a.quantity - b.quantity);
+
+    if (targetOrders.length === 0) {
+      alert(paidOnly ? "No paid user records found to export." : "No orders found to export.");
+      return;
+    }
     const headers = ["Order ID", "Customer", "Email", "Phone", "Tier", "Qty", "Amount (INR)", "Status", "Date"];
-    const rows = orders.map((o) => [
+    const rows = targetOrders.map((o) => [
       o.razorpay_order_id || o.id,
       o.buyer_name,
       o.buyer_email,
@@ -164,7 +174,8 @@ export default function DashboardPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `boombap_orders_export_${Date.now()}.csv`);
+    const filename = paidOnly ? `boombap_paid_users_${Date.now()}.csv` : `boombap_orders_export_${Date.now()}.csv`;
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -191,20 +202,29 @@ export default function DashboardPage() {
           <h1 className="text-xl font-black uppercase tracking-wide text-white">Dashboard</h1>
           <p className="text-xs text-white/35 mt-0.5">BOOMBAP Vol.1 — Live event overview</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="flex items-center gap-1.5 text-xs text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
             Live
           </span>
           <button
+            id="dashboard-export-paid"
+            type="button"
+            onClick={() => handleExport(true)}
+            className="flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/10 px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold"
+          >
+            <Icon d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" size={13} />
+            Export Paid Users
+          </button>
+          <button
             id="dashboard-export"
             type="button"
-            onClick={handleExport}
+            onClick={() => handleExport(false)}
             disabled={orders.length === 0}
             className="flex items-center gap-2 text-xs text-white/40 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
           >
             <Icon d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" size={13} />
-            Export
+            Export All
           </button>
         </div>
       </div>

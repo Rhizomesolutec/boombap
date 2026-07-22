@@ -79,15 +79,15 @@ export async function GET(_req: NextRequest) {
     const stats = (tiers ?? []).map((tier) => {
       const tierOrders = (orders ?? []).filter((o) => o.ticket_tier === tier.id)
 
-      const paid    = tierOrders.filter((o) => o.status === 'paid')
+      const paid = tierOrders.filter((o) => o.status === 'paid')
       const pending = tierOrders.filter((o) => o.status === 'pending')
-      const failed  = tierOrders.filter((o) => o.status === 'failed')
+      const failed = tierOrders.filter((o) => o.status === 'failed')
 
       const total_sold = paid.reduce((sum, o) => sum + (o.quantity ?? 0), 0)
       const total_pending = pending.reduce((sum, o) => sum + (o.quantity ?? 0), 0)
       const total_failed = failed.reduce((sum, o) => sum + (o.quantity ?? 0), 0)
       const total_revenue_paise = paid.reduce((sum, o) => sum + (o.amount_paise ?? 0), 0)
-      
+
       const tickets_remaining = Math.max(0, tier.quantity_limit - total_sold)
 
       return {
