@@ -19,8 +19,8 @@ async function ensureDefaultSAB6Tiers(supabase: any) {
         id: 'sab6-show',
         name: 'SAB6 SHOW',
         price: 6600, // ₹66
-        description: 'Get in early for an exclusive experience.',
-        perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
+        description: 'ENTER THE SAB6 ERA',
+        perks: ['step into sab6 show', 'limited ticket'],
         available: true,
         quantity_limit: 285,
         sort_order: 1,
