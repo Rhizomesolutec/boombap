@@ -10,7 +10,7 @@ async function ensureDefaultSAB6Tiers(supabase: any) {
         price: 100, // ₹1
         description: 'Test ticket for payment and email verification.',
         perks: ['Test Access', 'Payment Verification'],
-        available: true,
+        available: false,
         quantity_limit: 100,
         sort_order: 0,
         max_per_order: 4
@@ -22,7 +22,7 @@ async function ensureDefaultSAB6Tiers(supabase: any) {
         description: 'Get in early for an exclusive experience.',
         perks: ['General Admission', 'Early Access', 'Exclusive Merch'],
         available: true,
-        quantity_limit: 100,
+        quantity_limit: 285,
         sort_order: 1,
         max_per_order: 4
       }
