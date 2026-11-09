@@ -324,127 +324,59 @@ function BookingForm({ selectedTier }: { selectedTier: TicketTier }) {
   );
 }
 
+const DEFAULT_SAB6_TIER: TicketTier = {
+  id: "sab6-show",
+  name: "SAB6 SHOW",
+  price: 6600,
+  description: "ENTER THE SAB6 ERA",
+  perks: ["step into sab6 show", "limited ticket"],
+  available: true,
+  quantity_limit: 285,
+  tickets_remaining: 16,
+  max_per_order: 4,
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function TicketsPage() {
-  const [tiers, setTiers] = useState<TicketTier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedTierId, setSelectedTierId] = useState<string>("");
+  const [tiers, setTiers] = useState<TicketTier[]>([DEFAULT_SAB6_TIER]);
+  const [selectedTierId, setSelectedTierId] = useState("sab6-show");
 
   useEffect(() => {
-    const DEFAULT_SAB6_TIER = {
-      id: 'sab6-show',
-      name: 'SAB6 SHOW',
-      price: 6600,
-      description: 'ENTER THE SAB6 ERA',
-      perks: ['step into sab6 show', 'limited ticket'],
-      available: true,
-      quantity_limit: 285,
-      tickets_remaining: 16,
-      max_per_order: 4
-    };
+    let cancelled = false;
 
     async function loadTiers() {
       try {
-        const res = await fetch('/api/tickets/stats');
+        const res = await fetch("/api/tickets/stats?lite=sab6", {
+          signal: AbortSignal.timeout(6000),
+        });
+        if (!res.ok) return;
         const json = await res.json();
-        let matched: any = null;
-        if (res.ok && Array.isArray(json.tiers)) {
-          matched = json.tiers.find((t: any) =>
-            t.id === 'sab6-show' || (t.name.toUpperCase().includes('SAB6 SHOW') && (t.price === 6600 || t.price === 66))
-          ) || null;
-        }
+        const matched = json.tier;
+        if (!matched || cancelled) return;
 
-        const cap = 285;
-        const totalSold = matched?.total_sold ?? 269;
-        const remaining = Math.max(0, cap - totalSold);
-        // Auto-close if totalSold >= 285 or remaining <= 0 or marked unavailable
-        const isClosed = (matched && matched.available === false) || totalSold >= cap || remaining <= 0;
-
-        const singleTier = {
-          id: 'sab6-show',
-          name: 'SAB6 SHOW',
-          price: matched ? (matched.price === 66 ? 6600 : matched.price) : 6600,
-          description: matched?.description || DEFAULT_SAB6_TIER.description,
-          perks: matched?.perks || DEFAULT_SAB6_TIER.perks,
-          available: !isClosed,
-          quantity_limit: cap,
-          tickets_remaining: remaining,
-          total_sold: totalSold,
-          max_per_order: matched?.max_per_order || 4
-        };
-
-        setTiers([singleTier as any]);
-        setSelectedTierId(singleTier.id);
+        setTiers([
+          {
+            id: "sab6-show",
+            name: matched.name || DEFAULT_SAB6_TIER.name,
+            price: matched.price === 66 ? 6600 : matched.price || DEFAULT_SAB6_TIER.price,
+            description: matched.description || DEFAULT_SAB6_TIER.description,
+            perks: matched.perks?.length ? matched.perks : DEFAULT_SAB6_TIER.perks,
+            available: matched.available !== false,
+            quantity_limit: matched.quantity_limit || 285,
+            tickets_remaining: matched.tickets_remaining,
+            max_per_order: matched.max_per_order || 4,
+          },
+        ]);
       } catch {
-        setTiers([DEFAULT_SAB6_TIER as any]);
-        setSelectedTierId(DEFAULT_SAB6_TIER.id);
-      } finally {
-        setLoading(false);
+        // Keep the default tier so the page stays usable.
       }
     }
 
     loadTiers();
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  if (loading) {
-    return (
-      <main className="relative min-h-screen overflow-hidden bg-black text-white">
-        <section className="relative isolate min-h-[72vh] overflow-hidden border-b border-white/10 px-6 pb-16 pt-36 md:px-10 md:pb-24 md:pt-44 animate-pulse">
-          <div className="absolute inset-0 -z-20 bg-linear-to-r from-black via-black/90 to-black/50" />
-          <div className="mx-auto flex max-w-7xl flex-col justify-end gap-4">
-            <div className="h-4 w-40 bg-white/10 rounded" />
-            <div className="h-20 w-80 bg-white/10 rounded" />
-            <div className="h-6 w-96 bg-white/10 rounded" />
-          </div>
-        </section>
-        <section className="relative overflow-hidden bg-black px-6 py-20 md:px-10 md:py-28">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-              <div className="flex flex-col gap-4">
-                {[1, 2].map((i) => (
-                  <div key={i} className="border border-white/10 bg-white/2.5 p-6 h-40 animate-pulse rounded-sm" />
-                ))}
-              </div>
-              <div className="border border-white/12 bg-white/2.5 p-6 h-96 animate-pulse rounded-sm" />
-            </div>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="relative min-h-screen overflow-hidden bg-black text-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md border border-red-500/30 bg-red-500/5 p-8 rounded-sm">
-          <span className="text-3xl text-red-500">⚠</span>
-          <h2 className="mt-4 font-sarpanch text-xl font-black uppercase text-white">Failed to load booking</h2>
-          <p className="mt-2 font-proxima text-sm text-white/50">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="boombap-button mt-6"
-          >
-            <ScrambleText text="Try Again" />
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  if (tiers.length === 0) {
-    return (
-      <main className="relative min-h-screen overflow-hidden bg-black text-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md border border-white/10 bg-white/2.5 p-8 rounded-sm">
-          <h2 className="font-sarpanch text-xl font-black uppercase text-white">Tickets Coming Soon</h2>
-          <p className="mt-2 font-proxima text-sm text-white/50">Ticket sales for BOOMBAP Vol.1 are currently closed. Check back soon!</p>
-          <Link href="/" className="boombap-button mt-6">
-            <ScrambleText text="Back Home" />
-          </Link>
-        </div>
-      </main>
-    );
-  }
 
   const selectedTier = tiers.find((t) => t.id === selectedTierId);
 
@@ -472,30 +404,15 @@ export default function TicketsPage() {
             box-shadow: 5px 5px 0 rgba(222, 24, 24, 0.28), 10px 10px 0 rgba(114, 70, 193, 0.18) !important;
           }
         `}</style>
-        <Image
-          src="/crowd-section.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="-z-30 object-cover object-top opacity-25 grayscale"
-        />
-        <div className="absolute inset-0 -z-20 bg-linear-to-r from-black via-black/90 to-black/50" />
+        <div className="absolute inset-0 -z-20 bg-linear-to-r from-black via-black/90 to-black/55" />
         <div className="absolute inset-0 -z-10 bg-linear-to-t from-black via-transparent to-black/60" />
 
         <div className="mx-auto flex max-w-7xl flex-col justify-end">
-          <MotionReveal
-            as="span"
-            className="mb-5 block font-proxima text-[10px] font-bold uppercase tracking-[0.42em] text-primary"
-          >
+          <span className="mb-5 block font-proxima text-[10px] font-bold uppercase tracking-[0.42em] text-primary">
             Book Tickets / Upcoming Event
-          </MotionReveal>
+          </span>
 
-          <MotionReveal
-            as="div"
-            delay={0.08}
-            className="relative w-[80vw] max-w-[600px] aspect-[4/1] mb-6 ml-[110px] md:ml-[160px]"
-          >
+          <div className="relative mb-6 ml-[110px] aspect-[4/1] w-[80vw] max-w-[600px] md:ml-[160px]">
             <Image
               src="/SAB6/SAB6 Show.PNG"
               alt="SAB6"
@@ -503,22 +420,19 @@ export default function TicketsPage() {
               className="object-contain object-left sab6-filter"
               priority
             />
-          </MotionReveal>
+          </div>
 
-          <MotionReveal
-            delay={0.16}
-            className="mt-8 max-w-2xl border-l border-primary/70 pl-5 md:pl-7"
-          >
+          <div className="mt-8 max-w-2xl border-l border-primary/70 pl-5 md:pl-7">
             <p className="text-xl leading-relaxed text-white/70 md:text-2xl" style={{ fontFamily: "var(--font-selincah, 'Selincah', sans-serif)" }}>
               the first listen belongs to the real ones.<br />step into the world of sab6 befo6 anyone else. limited entries. one night that won’t happen twice.
             </p>
-          </MotionReveal>
+          </div>
 
-          <MotionReveal delay={0.24} className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-10 flex flex-wrap gap-4">
             <a href="#SAB6" className="boombap-button">
               <ScrambleText text="Step Into SAB6" />
             </a>
-          </MotionReveal>
+          </div>
         </div>
       </section>
 
@@ -567,7 +481,6 @@ export default function TicketsPage() {
               fill
               sizes="(min-width: 768px) 52vw, 100vw"
               className="object-cover"
-              priority
             />
             <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-transparent to-black/50 z-1" />
           </div>
@@ -682,21 +595,21 @@ export default function TicketsPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl">
           {/* Section label */}
-          <MotionReveal className="mb-10">
+          <div className="mb-10">
             <span className="font-proxima text-[10px] font-bold uppercase tracking-[0.4em] text-primary">
               Select Your Ticket
             </span>
-          </MotionReveal>
+          </div>
 
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             {/* ── LEFT: tier cards ── */}
             <div className="flex flex-col gap-4">
-              {tiers.map((tier, i) => {
+              {tiers.map((tier) => {
                 const active = tier.id === selectedTierId;
                 const isClosed = !tier.available || (tier.tickets_remaining !== undefined && tier.tickets_remaining <= 0);
 
                 return (
-                  <MotionReveal key={tier.id} delay={i * 0.07}>
+                  <div key={tier.id}>
                     <button
                       id={`tier-${tier.id}`}
                       type="button"
@@ -780,17 +693,14 @@ export default function TicketsPage() {
                         </ul>
                       </div>
                     </button>
-                  </MotionReveal>
+                  </div>
                 );
               })}
             </div>
 
             {/* ── RIGHT: booking option (active form when live, closed overlay when 285 reached) ── */}
             {selectedTier && (
-              <MotionReveal
-                delay={0.12}
-                className="sticky top-28 relative overflow-hidden rounded-sm"
-              >
+              <div className="sticky top-28 relative overflow-hidden rounded-sm">
                 {selectedTier.available && (selectedTier.tickets_remaining === undefined || selectedTier.tickets_remaining > 0) ? (
                   <BookingForm selectedTier={selectedTier} />
                 ) : (
@@ -848,7 +758,7 @@ export default function TicketsPage() {
                     </div>
                   </>
                 )}
-              </MotionReveal>
+              </div>
             )}
           </div>
         </div>
@@ -912,7 +822,6 @@ export default function TicketsPage() {
               fill
               sizes="(min-width: 768px) 52vw, 100vw"
               className="object-cover opacity-45 grayscale blur-[0.5px]"
-              priority
             />
             <div className="absolute inset-0 bg-linear-to-tr from-black/82 via-black/20 to-black/60 z-1" />
 

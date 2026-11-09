@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PageLoader() {
+  const pathname = usePathname();
   const [count, setCount] = useState(0);
   const [exiting, setExiting] = useState(false);
   const [done, setDone] = useState(false);
+  const skip = pathname === "/tickets";
 
   useEffect(() => {
+    if (skip) return;
     let v = 0;
     const interval = setInterval(() => {
       v += Math.floor(Math.random() * 18) + 6;
@@ -24,9 +28,9 @@ export default function PageLoader() {
     }, 60);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [skip]);
 
-  if (done) return null;
+  if (skip || done) return null;
 
   return (
     <AnimatePresence>

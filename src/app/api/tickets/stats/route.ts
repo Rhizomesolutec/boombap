@@ -47,10 +47,55 @@ async function ensureDefaultSAB6Tiers(supabase: any) {
   }
 }
 
+async function sab6Availability(supabase: ReturnType<typeof createServerSupabaseClient>) {
+  const cap = 285
+  const [{ data: tier }, { data: orders, error }] = await Promise.all([
+    supabase
+      .from('ticket_tiers')
+      .select('id, name, price, description, perks, available, quantity_limit, max_per_order')
+      .eq('id', 'sab6-show')
+      .maybeSingle(),
+    supabase
+      .from('orders')
+      .select('quantity')
+      .eq('ticket_tier', 'sab6-show')
+      .eq('status', 'paid'),
+  ])
+
+  if (error) {
+    throw error
+  }
+
+  const totalSold = (orders ?? []).reduce((sum, order) => sum + (order.quantity ?? 0), 0)
+  const remaining = Math.max(0, cap - totalSold)
+  const isClosed = tier?.available === false || totalSold >= cap || remaining <= 0
+
+  return {
+    tier: {
+      id: 'sab6-show',
+      name: tier?.name || 'SAB6 SHOW',
+      price: tier?.price === 66 ? 6600 : (tier?.price ?? 6600),
+      description: tier?.description,
+      perks: tier?.perks,
+      available: !isClosed,
+      quantity_limit: cap,
+      tickets_remaining: remaining,
+      total_sold: totalSold,
+      max_per_order: tier?.max_per_order || 4,
+    },
+  }
+}
+
 // ─── GET /api/tickets/stats ───
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const supabase = createServerSupabaseClient()
+
+    if (req.nextUrl.searchParams.get('lite') === 'sab6') {
+      const payload = await sab6Availability(supabase)
+      return NextResponse.json(payload)
+    }
+
     await ensureDefaultSAB6Tiers(supabase)
 
     // Fetch all tiers
