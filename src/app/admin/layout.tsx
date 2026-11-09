@@ -112,9 +112,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Image
             src="/bmbp-green-logo.png"
             alt="BOOMBAP Logo"
-            width={72}
-            height={72}
-            className="h-26 w-32 object-contain"
+            width={1340}
+            height={482}
+            className="h-16 w-auto object-contain"
           />
         </div>
 

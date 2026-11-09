@@ -138,9 +138,9 @@ function LoginForm() {
               <Image
                 src="/bmbp-green-logo.png"
                 alt="BOOMBAP Logo"
-                width={100}
-                height={100}
-                className="h-30 w-30 object-contain"
+                width={1340}
+                height={482}
+                className="mx-auto h-16 w-auto object-contain"
               />
             </div>
 

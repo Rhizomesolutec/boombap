@@ -141,7 +141,7 @@ export default function AboutLanding() {
               </div>
             </div>
 
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-10">
               {strips.map((strip, index) => (
                 <div
                   key={index}
@@ -159,12 +159,12 @@ export default function AboutLanding() {
                     alt=""
                     fill
                     sizes="(min-width: 1024px) 48vw, 100vw"
-                    className="object-cover opacity-80 saturate-110"
+                    className="object-cover saturate-110"
                     style={{
                       objectPosition: index % 2 === 0 ? "center 46%" : "center 54%",
                     }}
                   />
-                  <div className="absolute inset-0 bg-linear-to-r from-black/62 via-transparent to-black/30" />
+                  <div className="absolute inset-0 bg-linear-to-r from-black/35 via-transparent to-black/20" />
                 </div>
               ))}
             </div>

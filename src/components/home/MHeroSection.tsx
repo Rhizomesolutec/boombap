@@ -205,17 +205,18 @@ export default function MHeroSection() {
         className="relative w-full h-[48vh] sm:h-[58vh] md:h-[70vh] z-10 shrink-0 select-none"
         aria-hidden="true"
       >
-        <div className="absolute inset-0 overflow-hidden bg-black flex flex-col" style={{ isolation: "isolate" }}>
-        <ScanLine />  
+        <div className="absolute inset-0 flex flex-col overflow-hidden bg-black">
         <video
           src="/dj.mp4"
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
           style={{ filter: "brightness(1.15) contrast(1.12) saturate(1.1)" }}
         />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/55 via-black/25 to-black/65" />
+        <ScanLine />
 
         {/* Corner brackets - cinematic framing */}
         {[
@@ -234,18 +235,12 @@ export default function MHeroSection() {
         ))}
 
         {/* ── ROW 1: BOOM ── */}
-        <div
-          className="relative h-[50%] w-full flex items-end justify-center overflow-hidden pb-1"
-          style={{ mixBlendMode: "multiply", backgroundColor: "black" }}
-        >
+        <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center overflow-hidden pb-1">
           <CinematicWord word="BOOM" colorClass="text-primary" delay={0.15} />
         </div>
 
         {/* ── ROW 2: BAP ── */}
-        <div
-          className="relative h-[calc(50%+2px)] w-full flex items-start justify-center overflow-hidden pt-1 -mt-[1px]"
-          style={{ mixBlendMode: "multiply", backgroundColor: "black" }}
-        >
+        <div className="relative z-10 -mt-px flex min-h-0 flex-1 items-start justify-center overflow-hidden pt-1">
           <CinematicWord word="BAP" colorClass="text-secondary" delay={0.45} />
         </div>
         </div>

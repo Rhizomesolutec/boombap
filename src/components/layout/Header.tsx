@@ -82,18 +82,29 @@ export default function Header() {
       {/* ─── HEADER BAR ─── */}
       <header className="fixed top-0 left-0 w-full z-50 bg-transparent">
         <div className="mx-auto flex h-20 w-full items-center justify-between px-5 sm:px-6 md:h-28 md:px-16">
-          <Link href="/" className="relative z-50 flex items-center justify-center group">
-            <Image
-              src={pathname === "/tickets" ? "/SAB6/Show Name.jpg" : "/bmbp-green-logo.png"}
-              alt="BOOMBAP Logo"
-              width={128}
-              height={128}
-              priority
-              style={pathname === "/tickets" ? { filter: "url(#remove-white-filter)" } : undefined}
-              className={`h-24 w-24 md:h-32 md:w-32 object-contain transition-all duration-500 group-hover:scale-110 ${
-                menuOpen && pathname !== "/tickets" ? "invert" : ""
-              }`}
-            />
+          <Link href="/" className="relative z-50 flex h-14 items-center group md:h-16">
+            {pathname === "/tickets" ? (
+              <Image
+                src="/SAB6/Show Name.jpg"
+                alt="SAB6"
+                width={2000}
+                height={1474}
+                priority
+                style={{ filter: "url(#remove-white-filter)" }}
+                className="h-12 w-auto max-w-[7.5rem] object-contain md:h-14 md:max-w-[9rem]"
+              />
+            ) : (
+              <Image
+                src="/bmbp-green-logo.png"
+                alt="BOOMBAP Logo"
+                width={1340}
+                height={482}
+                priority
+                className={`h-11 w-auto object-contain transition-all duration-500 group-hover:scale-110 md:h-14 ${
+                  menuOpen ? "invert" : ""
+                }`}
+              />
+            )}
           </Link>
 
           <button

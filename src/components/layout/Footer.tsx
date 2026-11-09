@@ -53,9 +53,9 @@ export default function Footer() {
               <Image
                 src="/bmbp-green-logo.png"
                 alt="BOOMBAP"
-                width={64}
-                height={64}
-                className="h-14 w-14 object-contain"
+                width={1340}
+                height={482}
+                className="h-12 w-auto object-contain"
               />
               <div className="text-left">
                 <p className="font-sarpanch text-2xl font-black uppercase leading-none text-white">
